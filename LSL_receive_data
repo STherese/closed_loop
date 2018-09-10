@@ -1,0 +1,19 @@
+# Imports 
+from pylsl import StreamInlet, resolve_stream 
+
+print("looking for an EEG stream...")
+streams = resolve_stream('type', 'EEG') # Searches for EEG
+
+# create a new inlet to read from the stream
+inlet = StreamInlet(streams[0])
+
+while True:
+    # get a new sample 
+    sample, timestamp = inlet.pull_sample()
+print(timestamp, sample)
+
+# If I want to check the most recent sample of a stream, try pull_sample()
+
+# Implement local_clock()
+
+# LSL time stamps the data by push_sample() or to call the local_clock() function to read out the LSL clock, and then pass that in
