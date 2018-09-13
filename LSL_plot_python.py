@@ -12,6 +12,7 @@ import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore, QtGui
 
 
+
 plot_duration = 2.0
 
 
@@ -39,7 +40,7 @@ def update():
     chunk, timestamps = inlet.pull_chunk(timeout=0.0, max_samples=32)
     if timestamps:
         timestamps = np.asarray(timestamps)
-        y = np.asarray(chunk)
+        y = np.asarray(chunk) #y contains the EEG samples
 
         for ch_ix in range(inlet.channel_count):
             old_x, old_y = curves[ch_ix].getData()
