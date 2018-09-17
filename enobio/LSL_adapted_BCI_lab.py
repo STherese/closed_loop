@@ -10,8 +10,8 @@ Adapted a script from BCI lab. Gives an error from bci_workshop_tools. A couple 
 # Imports 
 from pylsl import StreamInlet, resolve_stream, local_clock
 import numpy as np
-import bci_workshop_tools as BCIw  # Our own functions for the workshop
-
+import bci_workshop_tools as BCIw 
+import time # Our own functions for the workshop
 
 streams = resolve_stream('type', 'EEG') # Searches for EEG stream
 
@@ -20,12 +20,9 @@ print("Number of streams found: %s " % len(streams))
 # Create a new inlet to read from the stream
 inlet = StreamInlet(streams[0])
 
-sample, timestamp = inlet.pull_sample() # pull_sample() gives the most recent sample of a stream
+# eeg_data, timestamp = inlet.pull_chunk()
 
-# Checks
-print(sample)
-print(len(sample))
-print(timestamp)
+# sample, timestamp = inlet.pull_sample() # pull_sample() gives the most recent sample of a stream
 
 t0 = [local_clock()] * inlet.channel_count
 
@@ -36,6 +33,8 @@ info = inlet.info()
 description = info.desc()
 fs = int(info.nominal_srate())
 n_channels = info.channel_count()
+
+#%%
 
 # Get names of all channels
 ch = description.child('channels').first_child()
@@ -58,13 +57,15 @@ shift_length = epoch_length - overlap_length
 
 # Index of the channel (electrode) to be used
 # 0 = left ear, 1 = left forehead, 2 = right forehead, 3 = right ear
-index_channel = [0, 1, 2, 3]
+index_channel_old = [0, 1, 2, 3]
+index_channel = [0]
 # Name of our channel for plotting purposes
 ch_names = [ch_names[i] for i in index_channel]
 n_channels = len(index_channel)
 
 feature_names = BCIw.get_feature_names(ch_names)
 
+#%%
 
 """3. INITIALIZE BUFFERS """
 
@@ -77,62 +78,54 @@ n_win_test = int(np.floor((buffer_length - epoch_length) /
                           shift_length + 1))
 
 # Initialize the feature data buffer (for plotting)
-feat_buffer = np.zeros((n_win_test, len(ch_names)))
+# feat_buffer = np.zeros((n_win_test, len(ch_names)))
 
 # Initialize the plots
 plotter_eeg = BCIw.DataPlotter(fs * buffer_length, ch_names, fs)
-plotter_feat = BCIw.DataPlotter(n_win_test, feature_names,
-                                1 / shift_length)
+# plotter_feat = BCIw.DataPlotter(n_win_test, feature_names, 1 / shift_length)
+
+#%%
 
 """ 3. GET DATA """
 
-# The try/except structure allows to quit the while loop by aborting the
-# script with <Ctrl-C>
-print('Press Ctrl-C in the console to break the while loop.')
 
-try:
-    # The following loop does what we see in the diagram of Exercise 1:
-    # acquire data, compute features, visualize raw EEG and the features
-    while True:
+# acquire data, compute features, visualize raw EEG and the features
+while True:
 
-        """ 3.1 ACQUIRE DATA """
-        # Obtain EEG data from the LSL stream
-        eeg_data, timestamp = inlet.pull_chunk(
-                timeout=1, max_samples=int(shift_length * fs))
+    """ 3.1 ACQUIRE DATA """
+    # Obtain EEG data from the LSL stream
+    eeg_data, timestamp = inlet.pull_chunk(
+            timeout=1, max_samples=int(shift_length * fs))
+    
+    # time.sleep(0.1)
 
-        # Only keep the channel we're interested in
-        ch_data = np.array(eeg_data)[:, index_channel]
+    # Only keep the channel we're interested in
+    ch_data = np.array(eeg_data)[:, index_channel]
 
-        # Update EEG buffer
-        eeg_buffer, filter_state = BCIw.update_buffer(
-                eeg_buffer, ch_data, notch=True,
-                filter_state=filter_state)
+    # Update EEG buffer
+    eeg_buffer, filter_state = BCIw.update_buffer(
+            eeg_buffer, ch_data, notch=False,
+            filter_state=filter_state)
 
-        """ 3.2 COMPUTE FEATURES """
-        # Get newest samples from the buffer
-        data_epoch = BCIw.get_last_data(eeg_buffer,
-                                        epoch_length * fs)
+    """ 3.2 COMPUTE FEATURES """
+    # Get newest samples from the buffer
+    data_epoch = BCIw.get_last_data(eeg_buffer,
+                                    epoch_length * fs)
 
-        # Compute features
-        feat_vector = BCIw.compute_feature_vector(data_epoch, fs)
-        feat_buffer, _ = BCIw.update_buffer(feat_buffer,
-                                            np.asarray([feat_vector]))
+    # Compute features
+#        feat_vector = BCIw.compute_feature_vector(data_epoch, fs)
+#        feat_buffer, _ = BCIw.update_buffer(feat_buffer,
+#                                            np.asarray([feat_vector]))
 
-        """ 3.3 VISUALIZE THE RAW EEG AND THE FEATURES """
-        plotter_eeg.update_plot(eeg_buffer)
-        plotter_feat.update_plot(feat_buffer)
-        #plt.pause(0.00001)
+    """ 3.3 VISUALIZE THE RAW EEG AND THE FEATURES """
+    plotter_eeg.update_plot(eeg_buffer)
+    # plotter_feat.update_plot(feat_buffer)
+    #plt.pause(0.00001)
 
-except KeyboardInterrupt:
+#except KeyboardInterrupt:
+#
+#    print('Closing!')
 
-    print('Closing!')
-
-
-
-
-
-# Can also read time series from LSL in chunks
-# chunk, timestamps = inlet.pull_chunk()
 
 #while True:
     # get a new sample 
