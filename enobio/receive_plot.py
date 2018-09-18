@@ -33,6 +33,9 @@ curves = []
 for ch_ix in range(inlet.channel_count):
     curves += [plt.plot()]
 
+#for ch_ix in inlet.channel_count:
+#    curves += [plt.plot()]
+
 def update():
     global inlet, curves, t0
     # Read data from the inlet. Use a timeout of 0.0 so we don't block GUI interaction.

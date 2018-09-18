@@ -7,6 +7,8 @@ Created on Tue Sep 11 09:13:53 2018
 Reads multi-channel time series from EEG (Enobio needs to be connected via wifi)
 
 This version runs without activating LSL LabRecorder.exe (NIC2.0 running - with LSL outlet)
+
+This code plots the most recent samples for a chosen channel - BUT plt loads while it does it, and thus it is not visible. But it works correctly.
 """
 
 # Imports 
@@ -29,7 +31,7 @@ t0 = [local_clock()] * inlet.channel_count
 
 print(sample)
 print(len(sample))
-print(t0)
+# print(t0)
 
 info = inlet.info()
 description = info.desc()
@@ -45,41 +47,29 @@ eeg_figure, = plt.plot([],[])
 
 #ch1=ch[:,1]
 
-def update_eeg(eeg_figure, new_data, t):
+def update_eeg(eeg_figure, t, new_data):
     eeg_figure.set_xdata(np.append(eeg_figure.get_xdata(),t))
     eeg_figure.set_ydata(np.append(eeg_figure.get_ydata(),new_data))    
-    plt.axis([-10000,0,-10000,0])
+    plt.axis([timestamp-50,timestamp+50,-40000,40000])
     plt.draw()
 
-for i in range(1000):
-    eeg_data, timestamp = inlet.pull_chunk()
+for i in range(0,250):
+    eeg_data, timestamps = inlet.pull_chunk(timeout=0.0, max_samples=32)
     eeg = np.array(eeg_data)
-    ch1=eeg[:,1]
+    # ch1=eeg[:,1]
     
     time.sleep(0.1)
-    update_eeg(eeg_figure,ch1,timestamp)
+    update_eeg(eeg_figure,timestamps,eeg[:,1])
 
     
-#fig = plt.figure()
-#ax=fig.add_subplot(1,1,1)
-
-#def animate():
-#    xar = []
-#    while True: 
-#        
-#        eeg_data, timestamp = inlet.pull_chunk()
-#        #eeg = np.array(eeg_data)
-#        #ch1=eeg[:,1]
-#        xar.append(int(eeg_data[1][2])
-#    ax1.plot(xar)
 #    
 #    
 #%%
 
-plt.ion()
-
-fig.show()
-fig.canvas.draw()
+#plt.ion()
+#
+#fig.show()
+#fig.canvas.draw()
 
 # Plots a channel for e.g. 8 time stamps 
 #for i in range(0,100):

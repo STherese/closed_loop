@@ -57,8 +57,8 @@ shift_length = epoch_length - overlap_length
 
 # Index of the channel (electrode) to be used
 # 0 = left ear, 1 = left forehead, 2 = right forehead, 3 = right ear
-index_channel_old = [0, 1, 2, 3]
-index_channel = [0]
+index_channel = [0, 1, 2, 3]
+# index_channel = [0]
 # Name of our channel for plotting purposes
 ch_names = [ch_names[i] for i in index_channel]
 n_channels = len(index_channel)
@@ -94,10 +94,10 @@ while True:
 
     """ 3.1 ACQUIRE DATA """
     # Obtain EEG data from the LSL stream
-    eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(shift_length * fs))
+    eeg_data, timestamps = inlet.pull_chunk(
+            timeout=0.0, max_samples=32)
     
-    # time.sleep(0.1)
+    time.sleep(0.1)
 
     # Only keep the channel we're interested in
     ch_data = np.array(eeg_data)[:, index_channel]
