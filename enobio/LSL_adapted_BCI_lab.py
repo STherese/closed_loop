@@ -95,7 +95,7 @@ while True:
     """ 3.1 ACQUIRE DATA """
     # Obtain EEG data from the LSL stream
     eeg_data, timestamps = inlet.pull_chunk(
-            timeout=0.0, max_samples=32)
+            timeout=1.0, max_samples=32)
     
     time.sleep(0.1)
 
@@ -120,7 +120,7 @@ while True:
     """ 3.3 VISUALIZE THE RAW EEG AND THE FEATURES """
     plotter_eeg.update_plot(eeg_buffer)
     # plotter_feat.update_plot(feat_buffer)
-    #plt.pause(0.00001)
+    plt.pause(0.00001)
 
 #except KeyboardInterrupt:
 #

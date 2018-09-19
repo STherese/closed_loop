@@ -50,7 +50,7 @@ eeg_figure, = plt.plot([],[])
 def update_eeg(eeg_figure, t, new_data):
     eeg_figure.set_xdata(np.append(eeg_figure.get_xdata(),t))
     eeg_figure.set_ydata(np.append(eeg_figure.get_ydata(),new_data))    
-    plt.axis([timestamp-50,timestamp+50,-40000,40000])
+    plt.axis([timestamp-20,timestamp+20,-40000,40000])
     plt.draw()
 
 for i in range(0,250):
