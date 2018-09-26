@@ -5,7 +5,11 @@ Created on Thu Sep 20 13:08:54 2018
 @author: gretatuckute
 """
 # Imports
-from settings import path_init
+import os
+print(os.getcwd())
+os.chdir('Documents\GitHub\closed_loop')
+print(os.getcwd())
+
 from PIL import Image
 import os # Can use os.getcwd() to check current working directory
 import random
@@ -17,55 +21,14 @@ from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
 import time 
 import numpy as np
 import matplotlib.pyplot as plt
+from settings import path_init
 
 
 data_path = path_init()
-jpgfile = Image.open(data_path + "th.jpg")
+# jpgfile = Image.open(data_path + "th.jpg")
 
 ############### EXPERIMENT FUNCTIONS #################
 
-def initialize(data_path, visualangle=[4,3]):
-    duration_image = 1
-
-    # Should initialize take an input from fuseImages, and add it to the trial list?
-
-    images, images_in_each_category = findImages(data_path)
-    trial_list = []
-
-    items = images_in_each_category.items() # Is this correctly made into a dict in findImages??
-    random.shuffle(items)
-
-    ready_statement = {'probeword': 'ready', 'condsFile': None}
-    done_statement = {'probeword': 'done! thanks', 'condsFile': None}
-    break_statement = {'probeword': 'break', 'condsFile': [{'duration': duration_image}]}
-
-    trial_list.append(ready_statement)
-    count = 1
-    for key, value in items:
-
-        trial = {}
-        temp_condsfile = []
-
-        # Inserting ready and breaks. INSERT BREAKS EVERY ????
-#        if count % 4 == 0:
-#            trial_list.append(break_statement)
-#            trial_list.append(ready_statement)
-
-        trial['probeword'] = key.decode('iso-8859-1')
-
-
-        for v in value:
-            temp_condsfile.append({'duration': duration_image,
-                                   'visualangle': visualangle,
-                                   'imagetest': v.decode('iso-8859-1')})
-
-        trial['condsFile'] = temp_condsfile
-        trial_list.append(trial)
-
-        count += 1
-
-    trial_list.append(done_statement)
-    return trial_list
 
 def findCategories(directory):
     """Returns the overall category folders in /data/.
@@ -97,7 +60,7 @@ def recursiveList(directory):
     return sorted(os.walk(directory, followlinks=follow_links), key=lambda tpl: tpl[0])
 
 def findImages(directory):
-    """Returns the number of samples in and classes in a given folder.
+    """Returns the number of samples in and categories in a given folder.
     
     # Arguments
         directory: Path to the data.
@@ -105,10 +68,14 @@ def findImages(directory):
     # Returns
         noImages: Total number of images in each category folder
         imageID: List with imageID (add this information somewhere in the stimuli initialization to document which images are used)
+        
+        images_in_each_category = dictionary of size 2 (if 2 categories), with key = category name, and value = list containing image paths
+        
+        
         ?
     """
 
-    image_formats = {'png', 'jpg', 'jpeg', 'bmp'}
+    image_formats = {'jpg', 'jpeg', 'pgm'}
 
     categories = findCategories(directory)
     no_categories = len(categories)
@@ -130,6 +97,11 @@ def findImages(directory):
                 images_in_each_category[subdir] = [subpath + '/' + ii for ii in files]
     print('Found %d images belonging to %d categories.\n' % (noImages, no_categories))
     return noImages, images_in_each_category
+
+
+
+
+
 
 def fuseImages(directory, alpha):
     """Returns a fused image
@@ -171,6 +143,49 @@ def fuseImages(directory, alpha):
     # Add the imageID and alpha value to a list?
     
     
+def initialize(data_path, visualangle=[4,3]):
+    duration_image = 1
+
+    # Should initialize take an input from fuseImages, and add it to the trial list?
+
+    images, images_in_each_category = findImages(data_path)
+    trial_list = []
+
+    items = images_in_each_category.items() # Is this correctly made into a dict in findImages??
+    # random.shuffle(items) # Create a way of shuffling the images at some point
+
+    ready_statement = {'probeword': 'ready', 'condsFile': None}
+    done_statement = {'probeword': 'done! thanks', 'condsFile': None}
+    break_statement = {'probeword': 'break', 'condsFile': [{'duration': duration_image}]}
+
+    trial_list.append(ready_statement)
+    count = 1
+    for key, value in items:
+
+        trial = {}
+        temp_condsfile = []
+
+        # Inserting ready and breaks. INSERT BREAKS EVERY ????
+#        if count % 4 == 0:
+#            trial_list.append(break_statement)
+#            trial_list.append(ready_statement)
+
+#         trial['probeword'] = key.decode('iso-8859-1')
+
+
+        for v in value:
+            temp_condsfile.append({'duration': duration_image,
+                                   'visualangle': visualangle})
+
+        trial['condsFile'] = temp_condsfile
+        trial_list.append(trial)
+        
+        trial_list.append(value)
+
+        count += 1
+
+    trial_list.append(done_statement)
+    return trial_list
     
     
 
@@ -199,9 +214,9 @@ else:
     if ok_data[5] == 'Execution':
         exp_time = time.localtime()
 
-        trialList = initialize(data_path + '/images')
+        trialList = initialize(data_path)
         experiment_path = data_path + ok_data[4]
-        file = open(experiment_path + '/info.txt', "w")
+        file = open(data_path + '/info.txt', "w")
 
         file.write('Name ' + ok_data[0] + '\n')
         file.write('Age ' + ok_data[1] + '\n')
@@ -214,7 +229,7 @@ else:
         print('Input saved')
 
     if ok_data[5] == 'Test':
-        trialList = initialize(data_path + '/trainimages')
+        trialList = initialize(data_path)
 
 expInfo = {u'session': u'001', u'participant': u''}
 
@@ -263,4 +278,63 @@ fixation_text = visual.TextStim(win=win, name='fixation_text',
                                 color='white', colorSpace='rgb', opacity=1,
                                 depth=-1.0)
 
+
+globalClock = core.Clock()  # to track the time since experiment started
+routineTimer = core.CountdownTimer()  # to track time remaining of each (non-slip) routine 
+
+while continueRoutine and routineTimer.getTime() > 0:
+        # get current time
+        t_probe = probe_wordClock.getTime()
+        frameN += 1  # number of completed frames
+        # update/draw components on each frame
+
+        # *probeword_text* updates
+        if t_probe >= 0.0 and probeword_text.status == NOT_STARTED:
+            # keep track of start time/frame for later
+            probeword_text.tStart = t_probe
+            probeword_text.frameNStart = frameN  # exact frame index
+            probeword_text.setAutoDraw(True)
+            first_probe_word = True
+        if probeword_text.status == STARTED and t_probe >= frameRemains:
+            probeword_text.setAutoDraw(False)
+            probe_word_2_lsl = False
+
+        # check if all components have finished
+        if not continueRoutine:  # a component has requested a forced-end of Routine
+            break
+
+        continueRoutine = False  # will revert to True if at least one component still running
+        for thisComponent in probe_wordComponents:
+            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                continueRoutine = True
+                break  # at least one component has not yet finished
+
+        # refresh the screen
+        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+            if probeword_text.autoDraw and first_probe_word:
+                first_probe_word = False
+
+                if make_ready_lsl_stream:
+                    outlet.push_sample(['ready'])
+                    make_ready_lsl_stream = False
+
+                if image_2_lsl:
+                    image_2_lsl = False
+                    outlet.push_sample([imagetest])
+
+                if first_long_break:
+                    first_long_break = False
+                    outlet.push_sample(['long break'])
+
+                if probeword == 'ready':
+                    make_ready_lsl_stream = True
+
+                win.flip()
+                #######################################
+                outlet.push_sample([probeword])
+                #######################################
+
+        # check for quit (the Esc key)
+        if endExpNow or event.getKeys(keyList=["escape"]):
+            core.quit()
 
