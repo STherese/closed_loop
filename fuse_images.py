@@ -32,27 +32,34 @@ data_path_scenes='C:/no_backup/no_backup/closed_loop/scenes/indoor/0/pgms'
 face_images=os.listdir(data_path_faces)
 background = Image.open(os.path.join(data_path_faces,face_images[1]))
 scenes_images=os.listdir(data_path_scenes)
-tstart=time.time()
-foreground = Image.open(os.path.join(data_path_scenes,scenes_images[1]))
-time_pgm=time.time()-tstart
-size = 130,160
-ratio=130/160
-w,h=foreground.size
-im_ratio=w/h
-if im_ratio>ratio:
-    size_w=int(ratio*h)
-    size_new=size_w,160
-    im_resized = foreground.resize(size_new, Image.ANTIALIAS)
+s=0;
+while s <10:#len(scenes_images)
+    tstart=time.time()
+    foreground = Image.open(os.path.join(data_path_scenes,scenes_images[1]))
+    time_pgm=time.time()-tstart
+    size = 130,160
+    ratio=130/160
+    w,h=foreground.size
+    im_ratio=w/h
+    if im_ratio>ratio:
+        size_w=int(ratio*h)
+        size_new=size_w,160
+        im_resized = foreground.resize(size_new, Image.ANTIALIAS)
 
 
-if im_ratio<ratio:
-    size_h=int(1/ratio*w)
-    size_new=130,size_h
-    im_resized = foreground.resize(size_new, Image.ANTIALIAS)
+    if im_ratio<ratio:
+        size_h=int(1/ratio*w)
+        size_new=130,size_h
+        im_resized = foreground.resize(size_new, Image.ANTIALIAS)
 
-im_cropped = im_resized.crop((0, 0, 130, 160))
-width=260
-height=320
+    im_cropped = im_resized.crop((0, 0, 130, 160))
+    data_path_scenes_save='C:/no_backup/no_backup/closed_loop/scenes/indoor/0/pgms/transformed/'
+    ext='.pgm'
+    im_cropped.save(data_path_scenes_save+'scene'+ str(s) + ext)
+    s=s+1
+#%%
+width=130#260
+height=160#320
 im_scenes = im_cropped.resize((width, height), Image.NEAREST)   
 im_faces = background.resize((width, height), Image.NEAREST)  
 #im_cropped.show()
