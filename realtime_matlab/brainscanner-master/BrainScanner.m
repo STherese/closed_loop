@@ -63,12 +63,11 @@ end
 
 %% Setup stream and settings
 
-%opts.eegStreamName = 'NIC';%'openvibeSignal'; %'EEG';
-%opts.eeg
+opts.eegStreamName = 'openvibeSignal'; %'EEG';
 opts.bufferrange = 10; % (in seconds)
-opts.channelrange = 1:32;
+opts.channelrange = 1:24;
 
-opts.samplingRate = 500;
+opts.samplingRate = 250;
 opts.blockSize = 32;
 opts.refreshrate = 1/(2*opts.blockSize/opts.samplingRate); % Maybe change this!
 
@@ -100,7 +99,7 @@ basis = load('model/basis_functions_24ch.mat','Qg');
 basisFunctions = basis.Qg;    % 569 basis functions uni-lateral
 opts.basisFunctions = basisFunctions;
 
-easyCapModelFull = load('model/Gain_Enobio_coords.mat','Gain');
+easyCapModelFull = load('model/Gain_mbraintrain_24ch.mat','Gain');
 
 easyCapModelFull=easyCapModelFull.Gain;
 easyCapModelFull(opts.bad_chans,:)=[];
@@ -108,13 +107,13 @@ no_chan=size(easyCapModelFull,1);
 easyCapModelFull=(eye(no_chan)-1/no_chan)*easyCapModelFull; % set gain to have average reference
 opts.forwardModel = easyCapModelFull*basisFunctions';
 opts.numSources = size(basisFunctions,1);
-channels=load('model/Channel_enobio32.mat','Channel');
+channels=load('model/Gain_mbraintrain_24ch.mat','Channel');
 opts.channames={channels.Channel(:).Name};clear channels
 
-vertface = load('model/Gain_Enobio_coords.mat','vert','face');
+vertface = load('model/vertface_24ch_ICBMtemp');
 opts.faces = vertface.face;
 opts.verts = vertface.vert;
-opts.numChannels = 32-numel(opts.bad_chans);
+opts.numChannels = 24-numel(opts.bad_chans);
 
 % prediction
 opts.print_predicted_label = 1;
