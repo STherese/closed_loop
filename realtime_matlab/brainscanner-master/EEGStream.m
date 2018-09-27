@@ -777,10 +777,11 @@ classdef EEGStream < handle
         function inlet = createInlet(self, lib, opts)
             % look for the desired device
             result = {};
-            disp(['Looking for a stream with name=' opts.eegStreamName ' ...']);
+            disp(['Looking for a stream']);%with name=' opts.eegStreamName ' ...'
             tryCounter = 0;
             while tryCounter < 5 && isempty(result)
-                result = lsl_resolve_byprop(lib,'name',opts.eegStreamName,1,2);
+                result = lsl_resolve_byprop(lib,'type','EEG');
+                
                 tryCounter = tryCounter+1;
             end
             if isempty(result)
