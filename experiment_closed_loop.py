@@ -7,7 +7,7 @@ Created on Thu Sep 20 13:08:54 2018
 # Imports
 import os
 print(os.getcwd())
-os.chdir('Documents\GitHub\closed_loop')
+os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
 print(os.getcwd())
 
 from PIL import Image
@@ -25,6 +25,7 @@ from settings import path_init
 
 
 data_path = path_init()
+
 # jpgfile = Image.open(data_path + "th.jpg")
 
 ############### EXPERIMENT FUNCTIONS #################
@@ -188,153 +189,209 @@ def initialize(data_path, visualangle=[4,3]):
     return trial_list
     
     
+############ TESTING PSYCHOPY #################
+
+# Initializing window
+win = visual.Window(
+    size=[500, 500], fullscr=False, screen=0,
+    allowGUI=False, allowStencil=False,
+    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
+    blendMode='avg', useFBO=True)
+
+# Following works:
+message = visual.TextStim(win, text='hello')
+message.setAutoDraw(True)  # automatically draw every frame
+win.flip()
+core.wait(2.0)
+message.setText('world')  # change properties of existing stim
+win.flip()
+core.wait(2.0)
+
+# Initializing clock:
+testClock = core.Clock()
+
+while testClock.getTime()<0:
+
+
+
+
+
+#
+## Initialize components for Routine "probe_word"
+#probe_wordClock = core.Clock()
+#
+#probeword_text = visual.TextStim(win=win, name='probeword_text',
+#                                 text='default text',
+#                                 font='Arial',
+#                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
+#                                 color='white', colorSpace='rgb', opacity=1,
+#                                 depth=0.0)
+#
+## Initialize components for Routine "trial"
+#trialClock = core.Clock()
+#image = visual.ImageStim(
+#    win=win, name='image', units='deg',
+#    image='sin', mask=None,
+#    ori=0, pos=(0, 0), size=1.0,
+#    color=[1, 1, 1], colorSpace='rgb', opacity=1,
+#    flipHoriz=False, flipVert=False,
+#    texRes=128, interpolate=True, depth=0.0)
+#
+#fixation_text = visual.TextStim(win=win, name='fixation_text',
+#                                text='+',
+#                                font='Arial',
+#                                pos=(0, 0), wrapWidth=None, ori=0,
+#                                color='white', colorSpace='rgb', opacity=1,
+#                                depth=-1.0)
+
+
 
 
 ######################### GUI ##########################
 
 # Store info about the experiment session
-expName = 'image_experiment'  # from the Builder filename that created this script
-###########
-dlg = gui.Dlg(title=expName)
-dlg.addText('Subject info')
-dlg.addField('Name:', "")
-dlg.addField('Age:', 21)
-dlg.addField('Note:', "")
-dlg.addField('Gender:', choices=["Male", "Female"])
-dlg.addText('Experiment Info')
-dlg.addField('Folder name:', "experiment_data/expXXX")
-dlg.addField('Setup:', choices=["Test", "Execution"])
-dlg.addText('Before clicking OK remember to activate LSL', color='red')
-ok_data = dlg.show()  # show dialog and wait for OK or Cancel
-ok_data = np.asarray([str(ii) for ii in ok_data])
-if not dlg.OK:  # or if ok_data is not None
-    core.quit()  # user pressed cancel
-else:
-
-    if ok_data[5] == 'Execution':
-        exp_time = time.localtime()
-
-        trialList = initialize(data_path)
-        experiment_path = data_path + ok_data[4]
-        file = open(data_path + '/info.txt', "w")
-
-        file.write('Name ' + ok_data[0] + '\n')
-        file.write('Age ' + ok_data[1] + '\n')
-        file.write('Note ' + ok_data[2] + '\n')
-        file.write('Gender ' + ok_data[3] + '\n')
-        file.write('Date ' + str(exp_time.tm_mday) + '/' + str(exp_time.tm_mon) + '/' + str(exp_time.tm_year) + ' ' + str(exp_time.tm_hour) + ':' + str(exp_time.tm_min))
-
-        file.close()
-
-        print('Input saved')
-
-    if ok_data[5] == 'Test':
-        trialList = initialize(data_path)
-
-expInfo = {u'session': u'001', u'participant': u''}
-
-expInfo['date'] = data.getDateStr()  # add a simple timestamp
-expInfo['expName'] = expName
-
-endExpNow = False  # flag for 'escape' or other condition => quit the exp
-
-win = visual.Window(
-    size=[3840, 2160], fullscr=True, screen=0,
-    allowGUI=False, allowStencil=False,
-    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
-    blendMode='avg', useFBO=True)
-
-# store frame rate of monitor if we can measure it
-expInfo['frameRate'] = win.getActualFrameRate()
-if expInfo['frameRate'] != None:
-    frameDur = 1.0 / round(expInfo['frameRate'])
-else:
-    frameDur = 1.0 / 60.0  # could not measure, so guess
-
-# Initialize components for Routine "probe_word"
-probe_wordClock = core.Clock()
-
-probeword_text = visual.TextStim(win=win, name='probeword_text',
-                                 text='default text',
-                                 font='Arial',
-                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
-                                 color='white', colorSpace='rgb', opacity=1,
-                                 depth=0.0)
-
-# Initialize components for Routine "trial"
-trialClock = core.Clock()
-image = visual.ImageStim(
-    win=win, name='image', units='deg',
-    image='sin', mask=None,
-    ori=0, pos=(0, 0), size=1.0,
-    color=[1, 1, 1], colorSpace='rgb', opacity=1,
-    flipHoriz=False, flipVert=False,
-    texRes=128, interpolate=True, depth=0.0)
-
-fixation_text = visual.TextStim(win=win, name='fixation_text',
-                                text='+',
-                                font='Arial',
-                                pos=(0, 0), wrapWidth=None, ori=0,
-                                color='white', colorSpace='rgb', opacity=1,
-                                depth=-1.0)
-
-
-globalClock = core.Clock()  # to track the time since experiment started
-routineTimer = core.CountdownTimer()  # to track time remaining of each (non-slip) routine 
-
-while continueRoutine and routineTimer.getTime() > 0:
-        # get current time
-        t_probe = probe_wordClock.getTime()
-        frameN += 1  # number of completed frames
-        # update/draw components on each frame
-
-        # *probeword_text* updates
-        if t_probe >= 0.0 and probeword_text.status == NOT_STARTED:
-            # keep track of start time/frame for later
-            probeword_text.tStart = t_probe
-            probeword_text.frameNStart = frameN  # exact frame index
-            probeword_text.setAutoDraw(True)
-            first_probe_word = True
-        if probeword_text.status == STARTED and t_probe >= frameRemains:
-            probeword_text.setAutoDraw(False)
-            probe_word_2_lsl = False
-
-        # check if all components have finished
-        if not continueRoutine:  # a component has requested a forced-end of Routine
-            break
-
-        continueRoutine = False  # will revert to True if at least one component still running
-        for thisComponent in probe_wordComponents:
-            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-                continueRoutine = True
-                break  # at least one component has not yet finished
-
-        # refresh the screen
-        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-            if probeword_text.autoDraw and first_probe_word:
-                first_probe_word = False
-
-                if make_ready_lsl_stream:
-                    outlet.push_sample(['ready'])
-                    make_ready_lsl_stream = False
-
-                if image_2_lsl:
-                    image_2_lsl = False
-                    outlet.push_sample([imagetest])
-
-                if first_long_break:
-                    first_long_break = False
-                    outlet.push_sample(['long break'])
-
-                if probeword == 'ready':
-                    make_ready_lsl_stream = True
-
-                win.flip()
-                #######################################
-                outlet.push_sample([probeword])
-                #######################################
-
-        # check for quit (the Esc key)
-        if endExpNow or event.getKeys(keyList=["escape"]):
-            core.quit()
+#expName = 'image_experiment'  # from the Builder filename that created this script
+############
+#dlg = gui.Dlg(title=expName)
+#dlg.addText('Subject info')
+#dlg.addField('Name:', "")
+#dlg.addField('Age:', 21)
+#dlg.addField('Note:', "")
+#dlg.addField('Gender:', choices=["Male", "Female"])
+#dlg.addText('Experiment Info')
+#dlg.addField('Folder name:', "experiment_data/expXXX")
+#dlg.addField('Setup:', choices=["Test", "Execution"])
+#dlg.addText('Before clicking OK remember to activate LSL', color='red')
+#ok_data = dlg.show()  # show dialog and wait for OK or Cancel
+#ok_data = np.asarray([str(ii) for ii in ok_data])
+#if not dlg.OK:  # or if ok_data is not None
+#    core.quit()  # user pressed cancel
+#else:
+#
+#    if ok_data[5] == 'Execution':
+#        exp_time = time.localtime()
+#
+#        trialList = initialize(data_path)
+#        experiment_path = data_path + ok_data[4]
+#        file = open(data_path + '/info.txt', "w")
+#
+#        file.write('Name ' + ok_data[0] + '\n')
+#        file.write('Age ' + ok_data[1] + '\n')
+#        file.write('Note ' + ok_data[2] + '\n')
+#        file.write('Gender ' + ok_data[3] + '\n')
+#        file.write('Date ' + str(exp_time.tm_mday) + '/' + str(exp_time.tm_mon) + '/' + str(exp_time.tm_year) + ' ' + str(exp_time.tm_hour) + ':' + str(exp_time.tm_min))
+#
+#        file.close()
+#
+#        print('Input saved')
+#
+#    if ok_data[5] == 'Test':
+#        trialList = initialize(data_path)
+#
+#expInfo = {u'session': u'001', u'participant': u''}
+#
+#expInfo['date'] = data.getDateStr()  # add a simple timestamp
+#expInfo['expName'] = expName
+#
+#endExpNow = False  # flag for 'escape' or other condition => quit the exp
+#
+#win = visual.Window(
+#    size=[3840, 2160], fullscr=True, screen=0,
+#    allowGUI=False, allowStencil=False,
+#    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
+#    blendMode='avg', useFBO=True)
+#
+## store frame rate of monitor if we can measure it
+#expInfo['frameRate'] = win.getActualFrameRate()
+#if expInfo['frameRate'] != None:
+#    frameDur = 1.0 / round(expInfo['frameRate'])
+#else:
+#    frameDur = 1.0 / 60.0  # could not measure, so guess
+#
+## Initialize components for Routine "probe_word"
+#probe_wordClock = core.Clock()
+#
+#probeword_text = visual.TextStim(win=win, name='probeword_text',
+#                                 text='default text',
+#                                 font='Arial',
+#                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
+#                                 color='white', colorSpace='rgb', opacity=1,
+#                                 depth=0.0)
+#
+## Initialize components for Routine "trial"
+#trialClock = core.Clock()
+#image = visual.ImageStim(
+#    win=win, name='image', units='deg',
+#    image='sin', mask=None,
+#    ori=0, pos=(0, 0), size=1.0,
+#    color=[1, 1, 1], colorSpace='rgb', opacity=1,
+#    flipHoriz=False, flipVert=False,
+#    texRes=128, interpolate=True, depth=0.0)
+#
+#fixation_text = visual.TextStim(win=win, name='fixation_text',
+#                                text='+',
+#                                font='Arial',
+#                                pos=(0, 0), wrapWidth=None, ori=0,
+#                                color='white', colorSpace='rgb', opacity=1,
+#                                depth=-1.0)
+#
+#
+#globalClock = core.Clock()  # to track the time since experiment started
+#routineTimer = core.CountdownTimer()  # to track time remaining of each (non-slip) routine 
+#
+#while continueRoutine and routineTimer.getTime() > 0:
+#        # get current time
+#        t_probe = probe_wordClock.getTime()
+#        frameN += 1  # number of completed frames
+#        # update/draw components on each frame
+#
+#        # *probeword_text* updates
+#        if t_probe >= 0.0 and probeword_text.status == NOT_STARTED:
+#            # keep track of start time/frame for later
+#            probeword_text.tStart = t_probe
+#            probeword_text.frameNStart = frameN  # exact frame index
+#            probeword_text.setAutoDraw(True)
+#            first_probe_word = True
+#        if probeword_text.status == STARTED and t_probe >= frameRemains:
+#            probeword_text.setAutoDraw(False)
+#            probe_word_2_lsl = False
+#
+#        # check if all components have finished
+#        if not continueRoutine:  # a component has requested a forced-end of Routine
+#            break
+#
+#        continueRoutine = False  # will revert to True if at least one component still running
+#        for thisComponent in probe_wordComponents:
+#            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+#                continueRoutine = True
+#                break  # at least one component has not yet finished
+#
+#        # refresh the screen
+#        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+#            if probeword_text.autoDraw and first_probe_word:
+#                first_probe_word = False
+#
+#                if make_ready_lsl_stream:
+#                    outlet.push_sample(['ready'])
+#                    make_ready_lsl_stream = False
+#
+#                if image_2_lsl:
+#                    image_2_lsl = False
+#                    outlet.push_sample([imagetest])
+#
+#                if first_long_break:
+#                    first_long_break = False
+#                    outlet.push_sample(['long break'])
+#
+#                if probeword == 'ready':
+#                    make_ready_lsl_stream = True
+#
+#                win.flip()
+#                #######################################
+#                outlet.push_sample([probeword])
+#                #######################################
+#
+#        # check for quit (the Esc key)
+#        if endExpNow or event.getKeys(keyList=["escape"]):
+#            core.quit()
 
