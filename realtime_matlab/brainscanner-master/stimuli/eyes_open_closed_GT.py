@@ -88,7 +88,12 @@ def log(msg):
 ###########################################################
 # Prepare window and stimuli
 ###########################################################
-win=visual.Window([1920,1080], pos=[0,0], fullscr=False, autoLog=False, monitor="DellLaptop")
+win = visual.Window(
+    size=[500, 500], fullscr=False, screen=0,
+    allowGUI=False, allowStencil=False,
+    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
+    blendMode='avg', useFBO=True)
+
 fixation = visual.GratingStim(win, tex=None, mask='gauss', sf=0, size=0.02,  name='fixation', autoLog=False)
 
 num_images = 10

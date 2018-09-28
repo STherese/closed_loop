@@ -26,10 +26,7 @@ from settings import path_init
 
 data_path = path_init()
 
-# jpgfile = Image.open(data_path + "th.jpg")
-
 ############### EXPERIMENT FUNCTIONS #################
-
 
 def findCategories(directory):
     """Returns the overall category folders in /data/.
@@ -99,7 +96,28 @@ def findImages(directory):
     print('Found %d images belonging to %d categories.\n' % (noImages, no_categories))
     return noImages, images_in_each_category
 
+def fuseStableImages(batch1, batch2):
+    """Returns a fused image with alpha 0.5
+        
+    # Arguments:
+        directory - make default
+        batch1: 50 images consisting of 45 dominant images and 5 lures
+        
+    # Returns
+        List of 50 fused images to use as stimuli in stable blocks
+    
+    
+    """
+    categories = findCategories(data_path) 
+    noImages, images_in_each_category = findImages(data_path)
+   
+    
+    background = Image.open(os.path.join(data_path + '/scenes/' + imageID), mode='r')
+    foreground = Image.open(os.path.join(data_path,'/faces/' + imageID))
 
+    fusedImage=Image.blend(background, foreground, .5)
+    
+    # Add the imageID and alpha value to a list?
 
 
 
@@ -107,7 +125,7 @@ def findImages(directory):
 def fuseImages(directory, alpha):
     """Returns a fused image
     
-    MAKE TWO DIFFERENT MODES: for stable blocks and NF. Altnernatively, make two different fuseImages functions, and call them separately depending on which block is running
+    MAKE TWO DIFFERENT MODES: for stable blocks and NF. Alternatively, make two different fuseImages functions, and call them separately depending on which block is running
     
     This function should take an input from the processing pipeline
     
@@ -191,11 +209,6 @@ def initialize(data_path, visualangle=[4,3]):
     
 ############ TESTING PSYCHOPY #################
 
-# Creating an outlet I can push samples to 
-    
-info = StreamInfo('CL', 'Markers', 1, 0, 'string', 'myuidw43536')
-outlet = StreamOutlet(info)
-
 # Initializing window
 win = visual.Window(
     size=[500, 500], fullscr=False, screen=0,
@@ -203,56 +216,33 @@ win = visual.Window(
     monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
     blendMode='avg', useFBO=True)
 
-# Following works:
-message = visual.TextStim(win, text='hello')
-message.setAutoDraw(True)  # automatically draw every frame
-win.flip()
-core.wait(2.0)
-message.setText('world')  # change properties of existing stim
-win.flip()
-core.wait(2.0)
+# Initializing fixation
+fixation_text = visual.TextStim(win=win, name='fixation_text',
+                                text='+',
+                                font='Arial',
+                                pos=(0, 0), wrapWidth=None, ori=0,
+                                color='white', colorSpace='rgb', opacity=1,
+                                depth=-1.0)
 
 # Initializing clock:
 testClock = core.Clock()
 
-while testClock.getTime()<1100:
-    outlet.push_sample(['test'])
-    win.flip()
-    outlet.push_sample(['test2'])
+# Initializing trial numbers
+num_trials = 50
+num_dom = 45
+num_lure = 5
+
+
+
+
+
+images = [visual.ImageStim(win, image='images/img%d.jpg' % image_list[idx_image]) for idx_image in range(num_images)] 
 
 
 
 
 
 
-
-#
-## Initialize components for Routine "probe_word"
-#probe_wordClock = core.Clock()
-#
-#probeword_text = visual.TextStim(win=win, name='probeword_text',
-#                                 text='default text',
-#                                 font='Arial',
-#                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
-#                                 color='white', colorSpace='rgb', opacity=1,
-#                                 depth=0.0)
-#
-## Initialize components for Routine "trial"
-#trialClock = core.Clock()
-#image = visual.ImageStim(
-#    win=win, name='image', units='deg',
-#    image='sin', mask=None,
-#    ori=0, pos=(0, 0), size=1.0,
-#    color=[1, 1, 1], colorSpace='rgb', opacity=1,
-#    flipHoriz=False, flipVert=False,
-#    texRes=128, interpolate=True, depth=0.0)
-#
-#fixation_text = visual.TextStim(win=win, name='fixation_text',
-#                                text='+',
-#                                font='Arial',
-#                                pos=(0, 0), wrapWidth=None, ori=0,
-#                                color='white', colorSpace='rgb', opacity=1,
-#                                depth=-1.0)
 
 
 
@@ -297,111 +287,3 @@ while testClock.getTime()<1100:
 #
 #    if ok_data[5] == 'Test':
 #        trialList = initialize(data_path)
-#
-#expInfo = {u'session': u'001', u'participant': u''}
-#
-#expInfo['date'] = data.getDateStr()  # add a simple timestamp
-#expInfo['expName'] = expName
-#
-#endExpNow = False  # flag for 'escape' or other condition => quit the exp
-#
-#win = visual.Window(
-#    size=[3840, 2160], fullscr=True, screen=0,
-#    allowGUI=False, allowStencil=False,
-#    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
-#    blendMode='avg', useFBO=True)
-#
-## store frame rate of monitor if we can measure it
-#expInfo['frameRate'] = win.getActualFrameRate()
-#if expInfo['frameRate'] != None:
-#    frameDur = 1.0 / round(expInfo['frameRate'])
-#else:
-#    frameDur = 1.0 / 60.0  # could not measure, so guess
-#
-## Initialize components for Routine "probe_word"
-#probe_wordClock = core.Clock()
-#
-#probeword_text = visual.TextStim(win=win, name='probeword_text',
-#                                 text='default text',
-#                                 font='Arial',
-#                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
-#                                 color='white', colorSpace='rgb', opacity=1,
-#                                 depth=0.0)
-#
-## Initialize components for Routine "trial"
-#trialClock = core.Clock()
-#image = visual.ImageStim(
-#    win=win, name='image', units='deg',
-#    image='sin', mask=None,
-#    ori=0, pos=(0, 0), size=1.0,
-#    color=[1, 1, 1], colorSpace='rgb', opacity=1,
-#    flipHoriz=False, flipVert=False,
-#    texRes=128, interpolate=True, depth=0.0)
-#
-#fixation_text = visual.TextStim(win=win, name='fixation_text',
-#                                text='+',
-#                                font='Arial',
-#                                pos=(0, 0), wrapWidth=None, ori=0,
-#                                color='white', colorSpace='rgb', opacity=1,
-#                                depth=-1.0)
-#
-#
-#globalClock = core.Clock()  # to track the time since experiment started
-#routineTimer = core.CountdownTimer()  # to track time remaining of each (non-slip) routine 
-#
-#while continueRoutine and routineTimer.getTime() > 0:
-#        # get current time
-#        t_probe = probe_wordClock.getTime()
-#        frameN += 1  # number of completed frames
-#        # update/draw components on each frame
-#
-#        # *probeword_text* updates
-#        if t_probe >= 0.0 and probeword_text.status == NOT_STARTED:
-#            # keep track of start time/frame for later
-#            probeword_text.tStart = t_probe
-#            probeword_text.frameNStart = frameN  # exact frame index
-#            probeword_text.setAutoDraw(True)
-#            first_probe_word = True
-#        if probeword_text.status == STARTED and t_probe >= frameRemains:
-#            probeword_text.setAutoDraw(False)
-#            probe_word_2_lsl = False
-#
-#        # check if all components have finished
-#        if not continueRoutine:  # a component has requested a forced-end of Routine
-#            break
-#
-#        continueRoutine = False  # will revert to True if at least one component still running
-#        for thisComponent in probe_wordComponents:
-#            if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
-#                continueRoutine = True
-#                break  # at least one component has not yet finished
-#
-#        # refresh the screen
-#        if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
-#            if probeword_text.autoDraw and first_probe_word:
-#                first_probe_word = False
-#
-#                if make_ready_lsl_stream:
-#                    outlet.push_sample(['ready'])
-#                    make_ready_lsl_stream = False
-#
-#                if image_2_lsl:
-#                    image_2_lsl = False
-#                    outlet.push_sample([imagetest])
-#
-#                if first_long_break:
-#                    first_long_break = False
-#                    outlet.push_sample(['long break'])
-#
-#                if probeword == 'ready':
-#                    make_ready_lsl_stream = True
-#
-#                win.flip()
-#                #######################################
-#                outlet.push_sample([probeword])
-#                #######################################
-#
-#        # check for quit (the Esc key)
-#        if endExpNow or event.getKeys(keyList=["escape"]):
-#            core.quit()
-
