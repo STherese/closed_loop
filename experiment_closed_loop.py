@@ -191,6 +191,11 @@ def initialize(data_path, visualangle=[4,3]):
     
 ############ TESTING PSYCHOPY #################
 
+# Creating an outlet I can push samples to 
+    
+info = StreamInfo('CL', 'Markers', 1, 0, 'string', 'myuidw43536')
+outlet = StreamOutlet(info)
+
 # Initializing window
 win = visual.Window(
     size=[500, 500], fullscr=False, screen=0,
@@ -210,7 +215,12 @@ core.wait(2.0)
 # Initializing clock:
 testClock = core.Clock()
 
-while testClock.getTime()<0:
+while testClock.getTime()<1100:
+    outlet.push_sample(['test'])
+    win.flip()
+    outlet.push_sample(['test2'])
+
+
 
 
 
