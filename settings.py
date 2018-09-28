@@ -23,7 +23,7 @@ def base_dir_init():
 #
 #
 def data_path_init():
-    data_path = base_dir_init() + '/closed_loop/data/'
+    data_path = base_dir_init() + '\closed_loop\data'
     return data_path
 #
 #

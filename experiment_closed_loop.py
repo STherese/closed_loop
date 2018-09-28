@@ -13,6 +13,7 @@ print(os.getcwd())
 from PIL import Image
 import os # Can use os.getcwd() to check current working directory
 import random
+from random import sample
 import sys  
 from pylsl import StreamInfo, StreamOutlet
 import numpy as np
@@ -25,6 +26,7 @@ from settings import path_init
 
 
 data_path = path_init()
+
 
 ############### EXPERIMENT FUNCTIONS #################
 
@@ -96,6 +98,27 @@ def findImages(directory):
     print('Found %d images belonging to %d categories.\n' % (noImages, no_categories))
     return noImages, images_in_each_category
 
+def createRandomImages(dom='woman',lure='man'):
+    '''Takes two input categories, and draws 45 images from the dominant category, and 5 from the lure category
+    
+    # Returns
+        One list consisting of 50 images from dominant and lure categories in random order
+    
+    '''
+    categories = findCategories(data_path) 
+    noImages, images_in_each_category = findImages(data_path)
+    
+    for key, value in images_in_each_category.items():        
+        if key == dom:
+            randomDom = sample(value, 10) # Randomly takes X no of samples from the value list corresponding to that category
+        if key == lure:
+            randomLure = sample(value, 5)
+            
+    fusedList = randomDom + randomLure
+    random.shuffle(fusedList)
+    
+    return fusedList
+
 def fuseStableImages(batch1, batch2):
     """Returns a fused image with alpha 0.5
         
@@ -104,18 +127,34 @@ def fuseStableImages(batch1, batch2):
         batch1: 50 images consisting of 45 dominant images and 5 lures
         
     # Returns
-        List of 50 fused images to use as stimuli in stable blocks
-    
+        List of 50 fused images to use as stimuli in stable blocks with 
+        
+        Save the images? Delete them afterwards
+        Save the image IDs to a log file
     
     """
-    categories = findCategories(data_path) 
-    noImages, images_in_each_category = findImages(data_path)
-   
+    aCat = createRandomImages(dom='woman',lure='man') # 50 attend category images
+    nCat = createRandomImages(dom='outdoor',lure='indoor')
+
+    # testing
+#    imageID1 = 'face1.jpg'
+#    imageID2 = 'scene1.jpg'
     
-    background = Image.open(os.path.join(data_path + '/scenes/' + imageID), mode='r')
-    foreground = Image.open(os.path.join(data_path,'/faces/' + imageID))
+    for ii in 
+
+    
+    background = Image.open(os.path.join(data_path + '\woman\\' + imageID1), mode='r')
+    foreground = Image.open(os.path.join(data_path + '\outdoor\\' + imageID2))
 
     fusedImage=Image.blend(background, foreground, .5)
+    
+    imageCount = 5
+    fusedImage.save(data_path + '\stable_save\\' 'fi_' + str(imageCount) + '.jpg')
+    
+    background.close()
+    foreground.close()
+    
+    imageCount += 1
     
     # Add the imageID and alpha value to a list?
 
@@ -154,8 +193,8 @@ def fuseImages(directory, alpha):
     
     # Make two modes
     
-    background = Image.open(os.path.join(data_path + '/scenes/' + imageID), mode='r')
-    foreground = Image.open(os.path.join(data_path,'/faces/' + imageID))
+    background = Image.open(os.path.join(data_path + '\scenes' + imageID), mode='r')
+    foreground = Image.open(os.path.join(data_path,'\faces' + imageID))
 
     fusedImage=Image.blend(background, foreground, .2)
     
@@ -228,9 +267,16 @@ fixation_text = visual.TextStim(win=win, name='fixation_text',
 testClock = core.Clock()
 
 # Initializing trial numbers
-num_trials = 50
-num_dom = 45
+num_trials = 15 #50
+num_dom = 10 #45
 num_lure = 5
+
+
+# write function that randomly takes this number of images?
+
+    
+            
+
 
 
 
