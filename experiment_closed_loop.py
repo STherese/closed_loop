@@ -21,12 +21,16 @@ from psychopy import gui, visual, core, data, event, monitors
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
 import time 
 import numpy as np
-import matplotlib.pyplot as plt
 from settings import path_init
-
+import csv
+import pandas as pd
 
 data_path = path_init()
 
+# Global variables
+
+global incrCount # This needs to go in main
+incrCount = 0 # This needs to go in main
 
 ############### EXPERIMENT FUNCTIONS #################
 
@@ -94,7 +98,7 @@ def findImages(directory):
                         break
                 if is_valid:
                     noImages += 1
-                images_in_each_category[subdir] = [subpath + '/' + ii for ii in files]
+                images_in_each_category[subdir] = [subpath + '\\' + ii for ii in files]
     print('Found %d images belonging to %d categories.\n' % (noImages, no_categories))
     return noImages, images_in_each_category
 
@@ -102,7 +106,8 @@ def createRandomImages(dom='woman',lure='man'):
     '''Takes two input categories, and draws 45 images from the dominant category, and 5 from the lure category
     
     # Returns
-        One list consisting of 50 images from dominant and lure categories in random order
+        fusedList: One list consisting of 50 images from dominant and lure categories in random order
+        fusedCats: One list of the category names from fusedList (used in directory indexing)
     
     '''
     categories = findCategories(data_path) 
@@ -112,14 +117,20 @@ def createRandomImages(dom='woman',lure='man'):
         if key == dom:
             randomDom = sample(value, 10) # Randomly takes X no of samples from the value list corresponding to that category
         if key == lure:
-            randomLure = sample(value, 5)
+            randomLure = sample(value, 1)
             
     fusedList = randomDom + randomLure
     random.shuffle(fusedList)
     
-    return fusedList
+    fusedCats = []
+    for item in fusedList:
+        str_item = str(item)
+        str_item = str_item.split('\\')
+        fusedCats.append(str_item[-2])
+    
+    return fusedList, fusedCats
 
-def fuseStableImages(batch1, batch2):
+def fuseStableImages(aDom, aLure, nDom, nLure): #make arguments that decide which categories to take and input in create random imgs
     """Returns a fused image with alpha 0.5
         
     # Arguments:
@@ -132,34 +143,62 @@ def fuseStableImages(batch1, batch2):
         Save the images? Delete them afterwards
         Save the image IDs to a log file
     
-    """
-    aCat = createRandomImages(dom='woman',lure='man') # 50 attend category images
-    nCat = createRandomImages(dom='outdoor',lure='indoor')
+    """    
 
-    # testing
-#    imageID1 = 'face1.jpg'
-#    imageID2 = 'scene1.jpg'
+    aCatImages, aCats = createRandomImages(dom=aDom,lure=aLure) # 50 attend category images
+    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure)    
     
-    for ii in 
+#    aCatImages, aCats = createRandomImages(dom='woman',lure='man') # 50 attend category images
+#    nCatImages, nCats = createRandomImages(dom='outdoor',lure='indoor')
+    
+    # df = pd.DataFrame(columns=['img1', 'img2']) # Initializing log pd df file
+
+    imageCount = 0
+    
+    for i in range(len(aCatImages)):
+        
+        background = Image.open(os.path.join(aCatImages[i]), mode='r')
+        foreground = Image.open(os.path.join(nCatImages[i]))
+        
+        fusedImage = Image.blend(background, foreground, .5)
+    
+        fusedImage.save(data_path + '\stable_save\\' 'no_' + str(imageCount) + '.jpg')
+    
+        background.close()
+        foreground.close()
+        fusedImage.close()
+    
+        imageCount += 1
+        
+        # Savo to pd dataframe to write log file
+        # df.loc[i] = [aCatImages[i], nCatImages[i]] # need to index differently, to add across calls
+    # incrCount += 1
+    
+    #df.loc[i + incrCount * len(aCatImages)] = ['NEW BLOCK'] # Writes to df in order to not overwrite 
+    #df.to_csv(data_path + '\logs' '\log_fuseStableImages.csv')
+    
+        with open(data_path + '\logs' '\log_fuseStableImages.csv', 'a') as logFile: #dont open it each time
+            logFile.write(aCatImages[i] + nCatImages[i])
+            logFile.write('\n') # JUST FOR TESTING WHETHER STUFF WORKS. MAKE INTO DF LATER
+            
+        
+    with open(data_path + '\log_fuseStableImages.csv', 'a') as logFile:
+        logFile.write('NEW BLOCK') 
+        
+    print('Created %d fused images in stable_save with alpha 0.5.\n' % (len(aCatImages)))
 
     
-    background = Image.open(os.path.join(data_path + '\woman\\' + imageID1), mode='r')
-    foreground = Image.open(os.path.join(data_path + '\outdoor\\' + imageID2))
-
-    fusedImage=Image.blend(background, foreground, .5)
+    # Add the imageIDs into a .csv and divide into blocks. write to this file
     
-    imageCount = 5
-    fusedImage.save(data_path + '\stable_save\\' 'fi_' + str(imageCount) + '.jpg')
+    # delete stable_save after it has been used? 
     
-    background.close()
-    foreground.close()
+    # with open(data_path + '\log_fuseStableImages.csv', 'a') as logFile:
+    #    logFile.write('NEW BLOCK') 
     
-    imageCount += 1
-    
-    # Add the imageID and alpha value to a list?
-
-
-
+#    with open(data_path + '\logs' '\log_fuseStableImages.csv', 'a') as logFile: #dont open it each time
+#            logFile.write(aCatImages[i] + nCatImages[i])
+#            logFile.writerow('hhh')
+#            logFile.write('\n')
 
 def fuseImages(directory, alpha):
     """Returns a fused image
@@ -271,18 +310,149 @@ num_trials = 15 #50
 num_dom = 10 #45
 num_lure = 5
 
+catDict = {'woman':'man','man':'woman','indoor':'outdoor','outdoor':'indoor',
+           'woman':'man','man':'woman','indoor':'outdoor','outdoor':'indoor'} 
+# 8 pairs, since I have 8 blocks for 1 run
 
-# write function that randomly takes this number of images?
+
+catFacesDict = {'woman':'man','man':'woman','woman':'man','man':'woman'} 
+catScenesDict = {'indoor':'outdoor','outdoor':'indoor', 'indoor':'outdoor','outdoor':'indoor'}
+
+for pair in catFacesDict:
+    print(pair)
 
     
+catFacesLst = [['woman','man'],['man','woman'],['woman','man'],['man','woman']] 
+    
+for pair in catFacesLst:
+    print(pair)
+    
+# When running a 8 stable blocks
+
+random.shuffle(catFacesLst) #Shuffle randomly
+
+for item in catFacesLst:
+    domInput = item[0]
+    lureInput = item[1]
+
+catFacesLst.pop(0) # Delete the category pair that has just been used as input 
+
+
+# Generate overall input list and simply take from this one
+
+# if stable block... do 8
+
+# if NF stable ...... do 4 
+
+
+catComb = [['man','woman','indoor','outdoor'],
+           ['man','woman','outdoor','indoor'],
+           ['woman','man','indoor','outdoor'],
+           ['woman','man','outdoor','indoor'],
+           ['indoor','outdoor','man','woman'],
+           ['indoor','outdoor','woman','man'],
+           ['outdoor','indoor','man','woman'],
+           ['outdoor','indoor','woman','man']]
+
+# shuffle 
+
+# Create inputs for fuseStableImages
+
+stabeBlockLen = 8
+
+# To generate the folders with images. Do not delete, but simply draw from them, and shuffle image order before
+for k in range(0,8):
+    aDom = catComb[k][0]
+    aLure = catComb[k][1]
+    nDom = catComb[k][2]
+    nLure = catComb[k][3] 
+    fuseStableImages(aDom, aLure, nDom, nLure)  
+    
+    images = [visual.ImageStim(win, image = data_path + '\stable_save\\no_%d.jpg' % stableIDs[idx_image]) for idx_image in range(len(stableIDs))] 
+    
+    for trial_idx in range(len(stableIDs)):
+        
+        for frameN in range(num_frames_trials):
+        
+            if 0 <= frameN < num_frames_stimuli: 
+                images[trial_idx].draw()
+        
+            win.flip()
+    
+    # Now run the stable block from this function?
+    
+    # Now stable_save has to correct imgs 
+    
+    # Run the experiment and delete all imgs in stable_save 
+
+
+stableIDs = list(range(0,11)) # The numbering of the images in stable_save
+frame_rate = 60
+stimuli_time = 1
+trials = 11 # images in block # 50
+
+
+num_frames_period = np.array([660, 660, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000]) #number of framer per each trial. Right now the same
+num_frames_stimuli = np.array([60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60]) #number of framer per each trial. Right now the same
+
+num_frames_period = num_frames_period.astype('int') # Denotes how long the trial periods are, e.g. 11 imgs x 1 s x 60 Hz = 660 frames
+num_frames_stimuli = num_frames_stimuli.astype('int') # Denotes how many frames a stimuli is shown
+
+
+images = [visual.ImageStim(win, image = data_path + '\stable_save\\no_%d.jpg' % stableIDs[idx_image]) for idx_image in range(len(stableIDs))] 
+    
+
+for trial in range(trials): # right now I have 11 trials
+    trial_clock = core.Clock()
+    
+    for frameN in range(num_frames_period[trial]): # Time x frame rate
+        if frameN == 0:
+            print('frame0')
+    
+        if 0 <= frameN < num_frames_stimuli[trial]: 
+            images[trial].draw()
+    
+            win.flip()
+        
+        if frameN > num_frames_stimuli[trial]:
+            print('above 60hz')
             
+            win.flip()
 
 
+log('Experiment started')
+for trial_idx in range(num_trials):
+	trial_clock = core.Clock()
+
+	log('Beginning trial %d' % trial_idx)
+
+	for frameN in range(num_frames_period[trial_idx]):
+
+		# play sounds
+		if frameN == 0:
+			open_sound.play()
+			pass
+		elif frameN == num_frames_open[trial_idx]:
+			closed_sound.play()
+
+		# visual
+		if 0 <= frameN < num_frames_open[trial_idx]: 
+			images[trial_idx].draw()
+
+		if num_frames_open[trial_idx] <= frameN:  # present stim for a different subset
+			fixation.draw()
+
+	    # switch buffer
+		win.flip()
+
+	log('Ended trial %d' % trial_idx)
+
+	win.clearBuffer()
+	win.flip()
+
+	trial_time = trial_clock.getTime()
 
 
-
-
-images = [visual.ImageStim(win, image='images/img%d.jpg' % image_list[idx_image]) for idx_image in range(num_images)] 
 
 
 
