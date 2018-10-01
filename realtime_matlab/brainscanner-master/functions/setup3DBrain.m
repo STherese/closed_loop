@@ -61,7 +61,7 @@ try flag_relval = opts.flag_relval; catch; flag_relval = false; end
 try data_unit = opts.data_unit; catch; data_unit = []; end
 try FaceAlpha = opts.FaceAlpha; catch; FaceAlpha = 1; end
 
-if isfield(opts,'crangeSym'), crangeSym = opts.crangeSym; else crangeSym = false; end
+if isfield(opts,'crangeSym'), crangeSym = opts.crangeSym; else crangeSym = true; end
 if crangeSym
     crange = [-max(abs(crange)) max(abs(crange))];
 end

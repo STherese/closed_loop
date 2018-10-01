@@ -1,4 +1,4 @@
-function handles = plot3DBrain(handles, data)
+function handles = plot3DBrain(handles, data,opts)
 %==========================================================================
 % Filename: plot_3Dbrain.m (function).
 % 
@@ -62,10 +62,10 @@ try data_unit = opts.data_unit; catch; data_unit = []; end
 try FaceAlpha = opts.FaceAlpha; catch; FaceAlpha = 1; end
 
 
-% try crange = opts.crange; catch; crange = [min(data(:)) max(data(:))]; end
-try crange = opts.crange; catch; crange = [-0.5 0.5]; end
+ try crange = opts.crange; catch; crange = [min(data(:)) max(data(:))]; end
+%try crange = opts.crange; catch; crange = [-0.05 0.05]; end
 
-if isfield(opts,'crangeSym'), crangeSym = opts.crangeSym; else crangeSym = false; end
+if isfield(opts,'crangeSym'), crangeSym = opts.crangeSym; else crangeSym = true; end
 if crangeSym
     crange = [-max(abs(crange)) max(abs(crange))];
 end
