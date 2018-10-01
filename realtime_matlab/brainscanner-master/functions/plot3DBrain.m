@@ -50,7 +50,7 @@ try cMAP = opts.cMAP; catch; cMAP = jet(256); end;
 
 try cBrain = opts.cBrain; catch; cBrain = [0.5 0.5 0.5]; end
 % try fs = opts.fs; catch; fs = 50; end;
-try thresh = opts.thresh; catch; thresh = 0.005; end
+try thresh = opts.thresh; catch; thresh = 0.01; end
 % try taxis = opts.taxis; catch; taxis = []; end;
 
 try flag_interp = opts.flag_interp; catch; flag_interp = true; end
@@ -63,7 +63,7 @@ try FaceAlpha = opts.FaceAlpha; catch; FaceAlpha = 1; end
 
 
 % try crange = opts.crange; catch; crange = [min(data(:)) max(data(:))]; end
-try crange = opts.crange; catch; crange = [0 0.5]; end
+try crange = opts.crange; catch; crange = [-0.5 0.5]; end
 
 if isfield(opts,'crangeSym'), crangeSym = opts.crangeSym; else crangeSym = false; end
 if crangeSym
@@ -122,7 +122,14 @@ if flag_interp
 else
     shading(handles.axes, 'flat');
 end
-
+%set(gcf,'MenuBar','none')
+set(gcf,'ToolBar','none')
+%colorbar
+%rotate(gca,[0,1,0],25)
+%rotate3d on
+%a=findall(gcf);
+%b=findall(a,'ToolTipString')
+%set(b,'Visible','Off')
 % light = findobj(handles.hfig,'Type','Light');
 % if isempty(light)
 %     camlight;

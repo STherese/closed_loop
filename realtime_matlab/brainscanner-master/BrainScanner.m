@@ -148,7 +148,7 @@ if strcmp(opts.recoveryMethod,'teVG');
         opts.gamma = nanmedian(gmedian);
         fprintf('Loaded gamma value = %3.2f from file gamma.mat\n', opts.gamma);
     catch
-        opts.gamma=-75;
+        opts.gamma=-50;
         fprintf('File gamma.mat not found. Using default value for gamma = %3.2f.\n', opts.gamma);
     end;
 end

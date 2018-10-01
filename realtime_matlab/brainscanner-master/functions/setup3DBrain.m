@@ -49,7 +49,7 @@ try cMAP = opts.cMAP; catch; cMAP = jet(256); end;
 try crange = opts.crange; catch; crange = [min(data(:)) max(data(:))]; end
 try cBrain = opts.cBrain; catch; cBrain = [0.5 0.5 0.5]; end
 % try fs = opts.fs; catch; fs = 50; end;
-try thresh = opts.thresh; catch; thresh = 0.5; end
+try thresh = opts.thresh; catch; thresh = 0.01; end
 % try taxis = opts.taxis; catch; taxis = []; end;
 try flag_interp = opts.flag_interp; catch; flag_interp = true; end
 % try flag_interactive = opts.flag_interactive; catch; flag_interactive = false; end

@@ -633,13 +633,21 @@ classdef EEGStream < handle
                 self.setupBrainFigure();
                 brainOpts.hfig = self.BrainFigure;
                 brainOpts.axes = self.BrainAxis;
+                brainOpts.flag_colorbar=true;
                 self.brainHandles = setup3DBrain(self.verts, self.faces, zeros(size(self.verts,1),1), brainOpts);
+                fig_colorbar=figure(2)
+                ax=gca;%(fig_colorbar);
+                colormap('jet')
+                c=colorbar(ax);
+                caxis([-0.5 0.5])
+                ax.Visible='off';
+                set(fig_colorbar,'MenuBar','none')
             end;
             
             fullSources = self.basisFunctions' * sources;
             %fullSources = std(fullSources,[],2);
             %             fullSources = var(fullSources,0,2);
-            self.brainHandles.crange=[-0.4 0.4];
+            self.brainHandles.crange=[-0.5 0.5];
             self.brainHandles = plot3DBrain(self.brainHandles, fullSources);
             %             plot_3Dbrain(self.verts, self.faces, fullSources, opts);
         end
