@@ -28,9 +28,17 @@ import pandas as pd
 data_path = path_init()
 
 # Global variables
+global stableSaveCount 
+stableSaveCount = 1 
 
-global incrCount # This needs to go in main
-incrCount = 0 # This needs to go in main
+trialIDs = list(range(0,11)) # The numbering of the images in stable_save.
+# Denotes the numbering of images in folders, will always be a list of length 50
+
+
+# Data frames for writing log files
+df_stableSave = pd.DataFrame(columns=['img1', 'img2'])
+
+
 
 ############### EXPERIMENT FUNCTIONS #################
 
@@ -187,7 +195,61 @@ def fuseStableImages(aDom, aLure, nDom, nLure): #make arguments that decide whic
         
     print('Created %d fused images in stable_save with alpha 0.5.\n' % (len(aCatImages)))
 
+def fuseStableImages2(aDom, aLure, nDom, nLure): #make arguments that decide which categories to take and input in create random imgs
+    """Returns a fused image with alpha 0.5, and fuses all images in arg1 folder with all images in arg2 folder
+        Would not work - need to 
+        
+        CREATE FOLDERS, too.
+        
+    # Arguments:
+        batch1: 50 images consisting of 45 dominant images and 5 lures
+        
+    # Returns
+        List of 50 fused images to use as stimuli in stable blocks with 
+        
+        Save the images? Delete them afterwards
+        Save the image IDs to a log file
     
+    """    
+
+    aCatImages, aCats = createRandomImages(dom=aDom,lure=aLure) # 50 attend category images
+    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure)    
+
+    imageCount = 0
+    global stableSaveCount
+    
+    # Make directory based on a global variable count for saving the fused images: stableSaveCount
+    newFolderPath = r'C:\\Users\\Greta\\Documents\GitHub\closed_loop\data\stable_save' + str(stableSaveCount) + '\\' 
+    if not os.path.exists(newFolderPath):
+        os.makedirs(newFolderPath)
+        
+#    df = pd.DataFrame(columns=['img1', 'img2']) # Initializing log pd df file
+    
+    for i in range(len(aCatImages)):
+        
+        background = Image.open(os.path.join(aCatImages[i]), mode='r')
+        foreground = Image.open(os.path.join(nCatImages[i]))
+        
+        fusedImage = Image.blend(background, foreground, .5)
+    
+        fusedImage.save(data_path + '\stable_save' + str(stableSaveCount) + '\\' 'no_' + str(imageCount) + '.jpg')
+    
+        background.close()
+        foreground.close()
+        fusedImage.close()
+    
+        imageCount += 1
+        
+        # TESTING DF
+        df_stableSave.loc[i + (stableSaveCount * len(aCatImages))] = [aCatImages[i], nCatImages[i]] # Writes to df in order to not overwrite 
+        
+    print('Created {0} fused images in stable_save{1} with alpha 0.5.\n'.format(len(aCatImages), str(stableSaveCount)))
+
+    df_stableSave.loc[i + stableSaveCount * len(aCatImages)] = ['NEW BLOCK']
+    df_stableSave.to_csv(data_path + '\logs' '\TEST_fuseStableImages.csv')
+
+    stableSaveCount += 1
+
     # Add the imageIDs into a .csv and divide into blocks. write to this file
     
     # delete stable_save after it has been used? 
@@ -200,7 +262,7 @@ def fuseStableImages(aDom, aLure, nDom, nLure): #make arguments that decide whic
 #            logFile.writerow('hhh')
 #            logFile.write('\n')
 
-def fuseImages(directory, alpha):
+def fuseImages(directory, alpha): # NOT DONE
     """Returns a fused image
     
     MAKE TWO DIFFERENT MODES: for stable blocks and NF. Alternatively, make two different fuseImages functions, and call them separately depending on which block is running
@@ -240,7 +302,7 @@ def fuseImages(directory, alpha):
     # Add the imageID and alpha value to a list?
     
     
-def initialize(data_path, visualangle=[4,3]):
+def initialize(data_path, visualangle=[4,3]): # NOT DONE
     duration_image = 1
 
     # Should initialize take an input from fuseImages, and add it to the trial list?
@@ -301,6 +363,8 @@ fixation_text = visual.TextStim(win=win, name='fixation_text',
                                 pos=(0, 0), wrapWidth=None, ori=0,
                                 color='white', colorSpace='rgb', opacity=1,
                                 depth=-1.0)
+fixation = visual.GratingStim(win, tex=None, mask='gauss', sf=0, size=0.02,
+    name='fixation', autoLog=False)
 
 # Initializing clock:
 testClock = core.Clock()
@@ -309,148 +373,106 @@ testClock = core.Clock()
 num_trials = 15 #50
 num_dom = 10 #45
 num_lure = 5
-
-catDict = {'woman':'man','man':'woman','indoor':'outdoor','outdoor':'indoor',
-           'woman':'man','man':'woman','indoor':'outdoor','outdoor':'indoor'} 
-# 8 pairs, since I have 8 blocks for 1 run
-
-
-catFacesDict = {'woman':'man','man':'woman','woman':'man','man':'woman'} 
-catScenesDict = {'indoor':'outdoor','outdoor':'indoor', 'indoor':'outdoor','outdoor':'indoor'}
-
-for pair in catFacesDict:
-    print(pair)
-
+ 
+def generateStableFolders():
+    '''Generates all possible combinations of images fused with alpha 0.5
     
-catFacesLst = [['woman','man'],['man','woman'],['woman','man'],['man','woman']] 
+    is currently done in the main
     
-for pair in catFacesLst:
-    print(pair)
     
-# When running a 8 stable blocks
+    '''
 
-random.shuffle(catFacesLst) #Shuffle randomly
-
-for item in catFacesLst:
-    domInput = item[0]
-    lureInput = item[1]
-
-catFacesLst.pop(0) # Delete the category pair that has just been used as input 
-
-
-# Generate overall input list and simply take from this one
-
-# if stable block... do 8
-
-# if NF stable ...... do 4 
-
-
-catComb = [['man','woman','indoor','outdoor'],
-           ['man','woman','outdoor','indoor'],
-           ['woman','man','indoor','outdoor'],
-           ['woman','man','outdoor','indoor'],
-           ['indoor','outdoor','man','woman'],
-           ['indoor','outdoor','woman','man'],
-           ['outdoor','indoor','man','woman'],
-           ['outdoor','indoor','woman','man']]
-
-# shuffle 
-
-# Create inputs for fuseStableImages
-
-stabeBlockLen = 8
-
-# To generate the folders with images. Do not delete, but simply draw from them, and shuffle image order before
-for k in range(0,8):
-    aDom = catComb[k][0]
-    aLure = catComb[k][1]
-    nDom = catComb[k][2]
-    nLure = catComb[k][3] 
-    fuseStableImages(aDom, aLure, nDom, nLure)  
-    
-    images = [visual.ImageStim(win, image = data_path + '\stable_save\\no_%d.jpg' % stableIDs[idx_image]) for idx_image in range(len(stableIDs))] 
-    
-    for trial_idx in range(len(stableIDs)):
-        
-        for frameN in range(num_frames_trials):
-        
-            if 0 <= frameN < num_frames_stimuli: 
-                images[trial_idx].draw()
-        
-            win.flip()
-    
-    # Now run the stable block from this function?
-    
-    # Now stable_save has to correct imgs 
-    
-    # Run the experiment and delete all imgs in stable_save 
-
-
-stableIDs = list(range(0,11)) # The numbering of the images in stable_save
 frame_rate = 60
-stimuli_time = 1
+stimuli_time = 1 # in seconds
 trials = 11 # images in block # 50
 
-
-num_frames_period = np.array([660, 660, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000]) #number of framer per each trial. Right now the same
+num_frames_period = np.array([660, 660, 660, 660, 3000, 3000, 3000, 3000, 3000, 3000, 3000]) #number of framer per each trial. Right now the same
 num_frames_stimuli = np.array([60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60]) #number of framer per each trial. Right now the same
 
 num_frames_period = num_frames_period.astype('int') # Denotes how long the trial periods are, e.g. 11 imgs x 1 s x 60 Hz = 660 frames
 num_frames_stimuli = num_frames_stimuli.astype('int') # Denotes how many frames a stimuli is shown
 
+timeLst = []
 
-images = [visual.ImageStim(win, image = data_path + '\stable_save\\no_%d.jpg' % stableIDs[idx_image]) for idx_image in range(len(stableIDs))] 
-    
-
-for trial in range(trials): # right now I have 11 trials
-    trial_clock = core.Clock()
-    
-    for frameN in range(num_frames_period[trial]): # Time x frame rate
-        if frameN == 0:
-            print('frame0')
-    
-        if 0 <= frameN < num_frames_stimuli[trial]: 
-            images[trial].draw()
-    
-            win.flip()
+def runBlock(images):
+    for trial in range(trials): # right now I have 11 trials
+        trialClock = core.Clock()
         
-        if frameN > num_frames_stimuli[trial]:
-            print('above 60hz')
+        for frameN in range(num_frames_stimuli[trial]): # Time x frame rate
             
+            if frameN == 0:
+                print('frame0')
+            
+            if 0 <= frameN < num_frames_stimuli[trial]: 
+                images[trial].draw()
+                t = trialClock.getTime()
+                timeLst.append(t)
+                
             win.flip()
+                
+#            if frameN <= num_frames_stimuli[trial]:  
+#                fixation_text.draw()
+#                
+#                win.flip()
+
+                
+            
+#            if frameN > num_frames_stimuli[trial]:
+#                print('above 60hz')
+#                
+#                win.flip()
 
 
-log('Experiment started')
-for trial_idx in range(num_trials):
-	trial_clock = core.Clock()
+def initializeStableBlock(folderName):
+    ''' Initializes the variable "images" later used for psychopy function in a folder
+    
+    # Arguments
+        Which folder to take
+    
+    # Returns
+        Make it call the show image function, so that images are used for that.
 
-	log('Beginning trial %d' % trial_idx)
+    '''
+    
+    images = [visual.ImageStim(win, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
+    runBlock(images) #Calling runBlock with the image input
+    print('In the initialize stable blocks loop')
+    
+    
 
-	for frameN in range(num_frames_period[trial_idx]):
 
-		# play sounds
-		if frameN == 0:
-			open_sound.play()
-			pass
-		elif frameN == num_frames_open[trial_idx]:
-			closed_sound.play()
-
-		# visual
-		if 0 <= frameN < num_frames_open[trial_idx]: 
-			images[trial_idx].draw()
-
-		if num_frames_open[trial_idx] <= frameN:  # present stim for a different subset
-			fixation.draw()
-
-	    # switch buffer
-		win.flip()
-
-	log('Ended trial %d' % trial_idx)
-
-	win.clearBuffer()
-	win.flip()
-
-	trial_time = trial_clock.getTime()
+#
+#log('Experiment started')
+#for trial_idx in range(num_trials):
+#	trial_clock = core.Clock()
+#
+#	log('Beginning trial %d' % trial_idx)
+#
+#	for frameN in range(num_frames_period[trial_idx]):
+#
+#		# play sounds
+#		if frameN == 0:
+#			open_sound.play()
+#			pass
+#		elif frameN == num_frames_open[trial_idx]:
+#			closed_sound.play()
+#
+#		# visual
+#		if 0 <= frameN < num_frames_open[trial_idx]: 
+#			images[trial_idx].draw()
+#
+#		if num_frames_open[trial_idx] <= frameN:  # present stim for a different subset
+#			fixation.draw()
+#
+#	    # switch buffer
+#		win.flip()
+#
+#	log('Ended trial %d' % trial_idx)
+#
+#	win.clearBuffer()
+#	win.flip()
+#
+#	trial_time = trial_clock.getTime()
 
 
 
