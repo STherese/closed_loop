@@ -10,6 +10,9 @@ from experiment_closed_loop import * # or only some functions
 
 global stableSaveCount
 
+# manual data path
+#data_path='C:\\Users\\Greta\\Documents\\GitHub\\closed_loop\\data'
+
 
 # Choose between either behavioral experimental session, or NF session
 # OR create two different main scripts? 

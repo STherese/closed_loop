@@ -213,7 +213,7 @@ def fuseStableImages2(aDom, aLure, nDom, nLure): #make arguments that decide whi
     """    
 
     aCatImages, aCats = createRandomImages(dom=aDom,lure=aLure) # 50 attend category images
-    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure)    
+    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure)  
 
     imageCount = 0
     global stableSaveCount
@@ -300,52 +300,7 @@ def fuseImages(directory, alpha): # NOT DONE
     fusedImage=Image.blend(background, foreground, .2)
     
     # Add the imageID and alpha value to a list?
-    
-    
-def initialize(data_path, visualangle=[4,3]): # NOT DONE
-    duration_image = 1
-
-    # Should initialize take an input from fuseImages, and add it to the trial list?
-
-    images, images_in_each_category = findImages(data_path)
-    trial_list = []
-
-    items = images_in_each_category.items() # Is this correctly made into a dict in findImages??
-    # random.shuffle(items) # Create a way of shuffling the images at some point
-
-    ready_statement = {'probeword': 'ready', 'condsFile': None}
-    done_statement = {'probeword': 'done! thanks', 'condsFile': None}
-    break_statement = {'probeword': 'break', 'condsFile': [{'duration': duration_image}]}
-
-    trial_list.append(ready_statement)
-    count = 1
-    for key, value in items:
-
-        trial = {}
-        temp_condsfile = []
-
-        # Inserting ready and breaks. INSERT BREAKS EVERY ????
-#        if count % 4 == 0:
-#            trial_list.append(break_statement)
-#            trial_list.append(ready_statement)
-
-#         trial['probeword'] = key.decode('iso-8859-1')
-
-
-        for v in value:
-            temp_condsfile.append({'duration': duration_image,
-                                   'visualangle': visualangle})
-
-        trial['condsFile'] = temp_condsfile
-        trial_list.append(trial)
         
-        trial_list.append(value)
-
-        count += 1
-
-    trial_list.append(done_statement)
-    return trial_list
-    
     
 ############ TESTING PSYCHOPY #################
 
@@ -386,36 +341,53 @@ frame_rate = 60
 stimuli_time = 1 # in seconds
 trials = 11 # images in block # 50
 
-num_frames_period = np.array([660, 660, 660, 660, 3000, 3000, 3000, 3000, 3000, 3000, 3000]) #number of framer per each trial. Right now the same
+num_frames_period = np.array([780, 780, 780, 780, 3000, 3000, 3000, 3000, 3000, 3000, 3000]) #number of framer per each trial. Right now the same
 num_frames_stimuli = np.array([60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60]) #number of framer per each trial. Right now the same
+
+
 
 num_frames_period = num_frames_period.astype('int') # Denotes how long the trial periods are, e.g. 11 imgs x 1 s x 60 Hz = 660 frames
 num_frames_stimuli = num_frames_stimuli.astype('int') # Denotes how many frames a stimuli is shown
 
 timeLst = []
 
+probeword_text = visual.TextStim(win=win, name='probeword_text',
+                                 text='yooooo',
+                                 font='Arial',
+                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
+                                 color='white', colorSpace='rgb', opacity=1,
+                                 depth=0.0)
+
+
 def runBlock(images):
     for trial in range(trials): # right now I have 11 trials
         trialClock = core.Clock()
+#        t = trialClock.getTime()
+#        timeLst.append(t)
+        #fixation.draw()
         
-        for frameN in range(num_frames_stimuli[trial]): # Time x frame rate
+        for frameN in range(num_frames_stimuli[trial]): # Time x frame rate            
+            if frameN >= 0:
+                #print('frame0') #TEXT
+                probeword_text.draw()
             
-            if frameN == 0:
-                print('frame0')
-            
-            if 0 <= frameN < num_frames_stimuli[trial]: 
-                images[trial].draw()
-                t = trialClock.getTime()
-                timeLst.append(t)
-                
             win.flip()
                 
+        for frameN in range(num_frames_period[trial]): # Time x frame rate            
+
+            #if num_frames_stimuli[trial] <= frameN: 
+            if 0 <= frameN < num_frames_stimuli[trial]: 
+                #images[trial].draw() #CURRENTLY ONLY DRAWING ONE IMAGE 
+
+                #fixation.draw()
+                # timeLst.append(t)
+                
+                win.flip()
+        
 #            if frameN <= num_frames_stimuli[trial]:  
 #                fixation_text.draw()
 #                
 #                win.flip()
-
-                
             
 #            if frameN > num_frames_stimuli[trial]:
 #                print('above 60hz')
@@ -437,8 +409,10 @@ def initializeStableBlock(folderName):
     images = [visual.ImageStim(win, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
     runBlock(images) #Calling runBlock with the image input
     print('In the initialize stable blocks loop')
-    
-    
+
+#    
+#if event.getKeys(keyList=["escape"]):
+#    win.close()
 
 
 #
