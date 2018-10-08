@@ -6,7 +6,7 @@ Created on Mon Oct  1 08:12:52 2018
 """
 
 # Imports
-from experiment_closed_loop import * # or only some functions
+from experiment_closed_loop_vol2 import * # or only some functions
 
 global stableSaveCount
 
@@ -60,8 +60,6 @@ for k in list(range(0,numStableBlocks)):
     nLure = catComb[k][3] 
     fuseStableImages2(aDom, aLure, nDom, nLure)  
     
-    # 
-# Write a function for running the blocks
     
     
 # Find the stable_save folders that have been generated

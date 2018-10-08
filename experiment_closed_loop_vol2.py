@@ -138,88 +138,37 @@ def createRandomImages(dom='woman',lure='man'):
     
     return fusedList, fusedCats
 
-def fuseStableImages(aDom, aLure, nDom, nLure): #make arguments that decide which categories to take and input in create random imgs
-    """Returns a fused image with alpha 0.5
-        
-    # Arguments:
-        directory - make default
-        batch1: 50 images consisting of 45 dominant images and 5 lures
-        
-    # Returns
-        List of 50 fused images to use as stimuli in stable blocks with 
-        
-        Save the images? Delete them afterwards
-        Save the image IDs to a log file
-    
-    """    
-
-    aCatImages, aCats = createRandomImages(dom=aDom,lure=aLure) # 50 attend category images
-    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure)    
-    
-#    aCatImages, aCats = createRandomImages(dom='woman',lure='man') # 50 attend category images
-#    nCatImages, nCats = createRandomImages(dom='outdoor',lure='indoor')
-    
-    # df = pd.DataFrame(columns=['img1', 'img2']) # Initializing log pd df file
-
-    imageCount = 0
-    
-    for i in range(len(aCatImages)):
-        
-        background = Image.open(os.path.join(aCatImages[i]), mode='r')
-        foreground = Image.open(os.path.join(nCatImages[i]))
-        
-        fusedImage = Image.blend(background, foreground, .5)
-    
-        fusedImage.save(data_path + '\stable_save\\' 'no_' + str(imageCount) + '.jpg')
-    
-        background.close()
-        foreground.close()
-        fusedImage.close()
-    
-        imageCount += 1
-        
-        # Savo to pd dataframe to write log file
-        # df.loc[i] = [aCatImages[i], nCatImages[i]] # need to index differently, to add across calls
-    # incrCount += 1
-    
-    #df.loc[i + incrCount * len(aCatImages)] = ['NEW BLOCK'] # Writes to df in order to not overwrite 
-    #df.to_csv(data_path + '\logs' '\log_fuseStableImages.csv')
-    
-        with open(data_path + '\logs' '\log_fuseStableImages.csv', 'a') as logFile: #dont open it each time
-            logFile.write(aCatImages[i] + nCatImages[i])
-            logFile.write('\n') # JUST FOR TESTING WHETHER STUFF WORKS. MAKE INTO DF LATER
-            
-        
-    with open(data_path + '\log_fuseStableImages.csv', 'a') as logFile:
-        logFile.write('NEW BLOCK') 
-        
-    print('Created %d fused images in stable_save with alpha 0.5.\n' % (len(aCatImages)))
 
 def fuseStableImages2(aDom, aLure, nDom, nLure): #make arguments that decide which categories to take and input in create random imgs
-    """Returns a fused image with alpha 0.5, and fuses all images in arg1 folder with all images in arg2 folder
-        Would not work - need to 
-        
-        CREATE FOLDERS, too.
-        
+    '''
+        Returns a fused image with alpha 0.5 based on a chosen attentive category, and a chosen unattentive category.
+        Saves the fused images in a folder named after the attentive category.
+    
     # Arguments:
-        batch1: 50 images consisting of 45 dominant images and 5 lures
+        Names of attentive dominant category, attentive lure category, nonattentive dominant category and nonattentive lure category.
         
     # Returns
-        List of 50 fused images to use as stimuli in stable blocks with 
+        List of 50 fused images to use as stimuli in stable blocks
         
         Save the images? Delete them afterwards
         Save the image IDs to a log file
-    
-    """    
+    '''
 
     aCatImages, aCats = createRandomImages(dom=aDom,lure=aLure) # 50 attend category images
-    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure)  
+    nCatImages, nCats = createRandomImages(dom=nDom,lure=nLure) 
+    
+    # Save information about the attentive category for later probe word text display
+    if aDom == 'man' or aDom == 'woman':
+        aFolder = 'faces' # Attentive folder name
+
+    if aDom == 'indoor' or aDom == 'outdoor':
+        aFolder = 'scenes'
 
     imageCount = 0
     global stableSaveCount
     
     # Make directory based on a global variable count for saving the fused images: stableSaveCount
-    newFolderPath = r'C:\\Users\\Greta\\Documents\GitHub\closed_loop\data\stable_save' + str(stableSaveCount) + '\\' 
+    newFolderPath = r'C:\\Users\\Greta\\Documents\GitHub\closed_loop\data\stable\\' + aFolder + str(stableSaveCount) + '\\' 
     if not os.path.exists(newFolderPath):
         os.makedirs(newFolderPath)
         
@@ -232,7 +181,7 @@ def fuseStableImages2(aDom, aLure, nDom, nLure): #make arguments that decide whi
         
         fusedImage = Image.blend(background, foreground, .5)
     
-        fusedImage.save(data_path + '\stable_save' + str(stableSaveCount) + '\\' 'no_' + str(imageCount) + '.jpg')
+        fusedImage.save(data_path + '\stable' + '\\' + aFolder + str(stableSaveCount) + '\\' 'no_' + str(imageCount) + '.jpg')
     
         background.close()
         foreground.close()
@@ -243,12 +192,14 @@ def fuseStableImages2(aDom, aLure, nDom, nLure): #make arguments that decide whi
         # TESTING DF
         df_stableSave.loc[i + (stableSaveCount * len(aCatImages))] = [aCatImages[i], nCatImages[i]] # Writes to df in order to not overwrite 
         
-    print('Created {0} fused images in stable_save{1} with alpha 0.5.\n'.format(len(aCatImages), str(stableSaveCount)))
+    print('Created {0} fused images in {2}{1} with alpha 0.5.\n'.format(len(aCatImages), str(stableSaveCount), aFolder))
 
     df_stableSave.loc[i + stableSaveCount * len(aCatImages)] = ['NEW BLOCK']
     df_stableSave.to_csv(data_path + '\logs' '\TEST_fuseStableImages.csv')
 
     stableSaveCount += 1
+    
+    del aDom, aLure, nDom, nLure, aFolder 
 
     # Add the imageIDs into a .csv and divide into blocks. write to this file
     
@@ -302,7 +253,7 @@ def fuseImages(directory, alpha): # NOT DONE
     # Add the imageID and alpha value to a list?
         
     
-############ TESTING PSYCHOPY #################
+############ PSYCHOPY #################
 
 # Initializing window
 win = visual.Window(
@@ -312,42 +263,18 @@ win = visual.Window(
     blendMode='avg', useFBO=True)
 
 # Initializing fixation
-fixation_text = visual.TextStim(win=win, name='fixation_text',
+textFix = visual.TextStim(win=win, name='textFix',
                                 text='+',
                                 font='Arial',
                                 pos=(0, 0), wrapWidth=None, ori=0,
                                 color='white', colorSpace='rgb', opacity=1,
                                 depth=-1.0)
-fixation = visual.GratingStim(win, tex=None, mask='gauss', sf=0, size=0.02,
-    name='fixation', autoLog=False)
 
-# Initializing clock:
-testClock = core.Clock()
-
-# Initializing trial numbers
-num_trials = 15 #50
-num_dom = 10 #45
-num_lure = 5
- 
-def generateStableFolders():
-    '''Generates all possible combinations of images fused with alpha 0.5
-    
-    is currently done in the main
-    
-    
-    '''
-
-frame_rate = 60
-stimuli_time = 1 # in seconds
-trials = 11 # images in block # 50
-
-num_frames_period = np.array([660, 780, 780, 780, 3000, 3000, 3000, 3000, 3000, 3000, 3000]) #number of framer per each trial. Right now the same
-num_frames_stimuli = np.array([60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60]) #number of framer per each trial. Right now the same
+# Initializing stimuli presentation times (in Hz)
+frameRate = 60
+stimuliTime = 60 
 
 
-
-num_frames_period = num_frames_period.astype('int') # Denotes how long the trial periods are, e.g. 11 imgs x 1 s x 60 Hz = 660 frames
-num_frames_stimuli = num_frames_stimuli.astype('int') # Denotes how many frames a stimuli is shown
 
 timeLst = []
 
@@ -365,21 +292,32 @@ textScenes = visual.TextStim(win=win, name='textScenes',
                                  color='white', colorSpace='rgb', opacity=1,
                                  depth=0.0)
 
-counter = 0
-def runBlock(images,text):
+# Initializing clock:
+testClock = core.Clock()
+
+def runBlock(images,textInput):
     '''Initializes a single block with text for 1 s, fixation cross, and trials for 1 s.
     
     # Arguments
         images: from initializeStableBlock, chooses images generated from a chosen foldername
         text: which category the subject should attend to. Either scenes or faces.
     
-    
     '''
+    if textInput == 'faces':
+        textProbe = textFaces
+    if textInput == 'scenes':
+        textProbe = textScenes
+
+    
     for frameN in range(0,150):
-        text.draw()
+        textProbe.draw()
         win.flip()
     
     # INSET fixation time here
+    for frameC in range(0,300):
+        textFix.draw()
+        win.flip()
+    
               
     imgCounter = 0 # Count of which image in "images" to take
 
@@ -394,7 +332,6 @@ def runBlock(images,text):
         
 
 
-
 def initializeStableBlock(folderName):
     ''' Initializes the variable "images" later used for psychopy function in a folder
     
@@ -402,12 +339,14 @@ def initializeStableBlock(folderName):
         Which folder to take
     
     # Returns
-        Make it call the show image function, so that images are used for that.
+        Calls runBlock, so that images are used for that.
 
     '''
     
+    textInput = folderName[:-1] # Removing the digit from the folder, in order  to use the folder name for probe word input
+    
     images = [visual.ImageStim(win, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
-    runBlock(images,textFaces) #Calling runBlock with the image input
+    runBlock(images,textInput) #Calling runBlock with the image input
     print('In the initialize stable blocks loop')
 
 #    
