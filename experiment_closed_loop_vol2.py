@@ -17,11 +17,11 @@ from random import sample
 import sys  
 from pylsl import StreamInfo, StreamOutlet
 import numpy as np
-from psychopy import gui, visual, core, data, event, monitors
+from psychopy import gui, visual, core, data, event, monitors, logging
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
 import time 
 import numpy as np
-from settings import path_init
+from settingsnew import path_init
 import csv
 import pandas as pd
 
@@ -213,87 +213,55 @@ def fuseStableImages2(aDom, aLure, nDom, nLure): #make arguments that decide whi
 #            logFile.writerow('hhh')
 #            logFile.write('\n')
 
-def fuseImages(directory, alpha): # NOT DONE
-    """Returns a fused image
-    
-    MAKE TWO DIFFERENT MODES: for stable blocks and NF. Alternatively, make two different fuseImages functions, and call them separately depending on which block is running
-    
-    This function should take an input from the processing pipeline
-    
-    # Arguments:
-        directory
-        alpha: determines the degree of background vs. foreground visibility
-        
-    # Returns
-        ?? fused image - save, or feed directly into a different function?
-    
-    
-    """
-    categories = findCategories(data_path) 
-    noImages, images_in_each_category = findImages(data_path)
-    # Use the found images (function: findImages) as input to fuseImages.
-    # Shuffle randomly
-    
-    # if nf-mode (neurofeedback mode): use parameter
-    
-    # if block-mode: use a set parameter for fusing images
-    
-    # Add imageID as data_path + imageID
-    
-    # Make a shuffled random list and draw imageIDs from those
-    # Somehow combine e.g. indoor + outdoor
-    
-    # Make two modes
-    
-    background = Image.open(os.path.join(data_path + '\scenes' + imageID), mode='r')
-    foreground = Image.open(os.path.join(data_path,'\faces' + imageID))
-
-    fusedImage=Image.blend(background, foreground, .2)
-    
-    # Add the imageID and alpha value to a list?
-        
     
 ############ PSYCHOPY #################
 
 # Initializing window
 win = visual.Window(
     size=[500, 500], fullscr=False, screen=0,
-    allowGUI=False, allowStencil=False,
+    allowGUI=False, allowStencil=False, autolog=True,
     monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb',
     blendMode='avg', useFBO=True)
 
-# Initializing fixation
-textFix = visual.TextStim(win=win, name='textFix',
-                                text='+',
-                                font='Arial',
+# Initializing fixation text and probe word text 
+textFix = visual.TextStim(win=win, name='textFix', text='+', font='Arial',
                                 pos=(0, 0), wrapWidth=None, ori=0,
-                                color='white', colorSpace='rgb', opacity=1,
-                                depth=-1.0)
+                                color='white', colorSpace='rgb', opacity=1, depth=-1.0)
+
+textFaces = visual.TextStim(win=win, name='textFaces', text='faces', font='Arial',
+                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
+                                 color='white', colorSpace='rgb', opacity=1, depth=0.0)
+
+textScenes = visual.TextStim(win=win, name='textScenes', text='scenes', font='Arial',
+                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
+                                 color='white', colorSpace='rgb', opacity=1, depth=0.0)
 
 # Initializing stimuli presentation times (in Hz)
 frameRate = 60
-stimuliTime = 60 
+probeTime = 120
+fixTime = 120
+stimTime = 60 # stimuli time for presenting each image
+stimTimeTotal = 660
+# numImages = 50
 
+# Prepare log
+log_base = time.strftime('%m-%d-%y_%H-%M-%S')
+log_path = data_path + '\log\\' + 'log_' + str(log_base) + '.txt'
 
+globalClock = core.Clock()
+logging.LogFile(log_path, level=logging.EXP, filemode='a')
+logging.setDefaultClock(globalClock)
+logging.console = True
 
-timeLst = []
-
-textFaces = visual.TextStim(win=win, name='textFaces',
-                                 text='faces',
-                                 font='Arial',
-                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
-                                 color='white', colorSpace='rgb', opacity=1,
-                                 depth=0.0)
-
-textScenes = visual.TextStim(win=win, name='textScenes',
-                                 text='scenes',
-                                 font='Arial',
-                                 units='norm', pos=(0, 0), wrapWidth=None, ori=0,
-                                 color='white', colorSpace='rgb', opacity=1,
-                                 depth=0.0)
+def log(msg):
+    logging.log(level=logging.EXP, msg=msg) 
+    ''' For printing messages in the promt
+    
+    '''
 
 # Initializing clock:
-testClock = core.Clock()
+#trialClock = core.Clock()
+#timeList = []
 
 def runBlock(images,textInput):
     '''Initializes a single block with text for 1 s, fixation cross, and trials for 1 s.
@@ -303,33 +271,36 @@ def runBlock(images,textInput):
         text: which category the subject should attend to. Either scenes or faces.
     
     '''
+#    trialClock.reset()
+#    t = trialClock.getTime()
+#    timeList.append(t)
+    log('Running a stable block')
+    
     if textInput == 'faces':
         textProbe = textFaces
     if textInput == 'scenes':
         textProbe = textScenes
 
-    
-    for frameN in range(0,150):
+    for frameN in range(0,probeTime):
         textProbe.draw()
         win.flip()
     
-    # INSET fixation time here
-    for frameC in range(0,300):
+    for frameN in range(0,fixTime):
         textFix.draw()
         win.flip()
-    
               
-    imgCounter = 0 # Count of which image in "images" to take
+    imgCounter = 0 # Count of which image in "images" to take, used for indexing "images"
 
-    for frameB in range(0,660): # 660 is 60*11, but it should be 60*50
-        if frameB % 60 == 0 and imgCounter <= 9:
-            imgCounter += 1
-            for newframe in range(0,60):
-                if newframe >= 0:
+    for frameN in range(0,11): 
+        if imgCounter <= 10: 
+            for frameNew in range(0,stimTime):
+                if frameNew >= 0:
                     images[imgCounter].draw()
-                
                 win.flip()
-        
+                
+            imgCounter += 1
+            
+
 
 
 def initializeStableBlock(folderName):
@@ -345,58 +316,17 @@ def initializeStableBlock(folderName):
     
     textInput = folderName[:-1] # Removing the digit from the folder, in order  to use the folder name for probe word input
     
-    images = [visual.ImageStim(win, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
+    #images = [visual.ImageStim(win, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
+    images = [visual.ImageStim(win, autoLog = True, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
     runBlock(images,textInput) #Calling runBlock with the image input
     print('In the initialize stable blocks loop')
 
-#    
-#if event.getKeys(keyList=["escape"]):
-#    win.close()
 
+# Initializing button press
+keys = event.getKeys(keyList=None, timeStamped=globalClock)
 
-#
-#log('Experiment started')
-#for trial_idx in range(num_trials):
-#	trial_clock = core.Clock()
-#
-#	log('Beginning trial %d' % trial_idx)
-#
-#	for frameN in range(num_frames_period[trial_idx]):
-#
-#		# play sounds
-#		if frameN == 0:
-#			open_sound.play()
-#			pass
-#		elif frameN == num_frames_open[trial_idx]:
-#			closed_sound.play()
-#
-#		# visual
-#		if 0 <= frameN < num_frames_open[trial_idx]: 
-#			images[trial_idx].draw()
-#
-#		if num_frames_open[trial_idx] <= frameN:  # present stim for a different subset
-#			fixation.draw()
-#
-#	    # switch buffer
-#		win.flip()
-#
-#	log('Ended trial %d' % trial_idx)
-#
-#	win.clearBuffer()
-#	win.flip()
-#
-#	trial_time = trial_clock.getTime()
-
-
-
-
-
-
-
-
-
-
-
+if event.getKeys(keyList=["escape"]):
+    win.close()
 
 ######################### GUI ##########################
 

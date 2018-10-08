@@ -172,4 +172,15 @@ def fuseStableImages(aDom, aLure, nDom, nLure): #make arguments that decide whic
         logFile.write('NEW BLOCK') 
         
     print('Created %d fused images in stable_save with alpha 0.5.\n' % (len(aCatImages)))
+
+#%% Part of runBlock that works, but the modulus is unnecessary
     
+#    for frameN in range(0,660): # 660 is 60*11, but it should be 60*50
+#        if frameN % stimTime == 0 and imgCounter <= 10: # Every
+#            for frameNew in range(0,stimTime):
+#                if frameNew >= 0:
+#                    images[imgCounter].draw()
+#                win.flip()
+#                
+#            imgCounter += 1
+        
