@@ -20,7 +20,7 @@ expMode = 'beh'
 
 # Initializing variables based on type of session
 if expMode == 'beh':
-    numStableBlocks = 8
+    numStableBlocks = 2 # 8 or 16, but testing with 2
 
 if expMode == 'nf':
     numStableBlocks = 4
@@ -39,7 +39,6 @@ catComb = [['man','woman','indoor','outdoor'],
 #stableSaveCount = 1 
 
 # Try to create different stable_save folders
-
 # if beh session: initiate fuseStableImages2 8 times. 
 # if NF session: initiate fuseStableImages2 4 times
 # Delete the folders after a session - either manually or script 

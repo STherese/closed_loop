@@ -246,10 +246,16 @@ stimTimeTotal = 660
 
 # Prepare log
 log_base = time.strftime('%m-%d-%y_%H-%M-%S')
-log_path = data_path + '\log\\' + 'log_' + str(log_base) + '.txt'
+log_path = data_path + '\log\\' + 'log_' + str(log_base) + '.csv'
+log_path_key = data_path + '\log\\' + 'log_key_' + str(log_base) + '.csv'
 
 globalClock = core.Clock()
-logging.LogFile(log_path, level=logging.EXP, filemode='a')
+globalClock.reset() 
+logging.LogFile(log_path, level=logging.EXP, filemode='w')
+logging.setDefaultClock(globalClock)
+logging.console = True
+
+logging.LogFile(log_path_key, level=logging.DATA, filemode='w') # Log file for button press only
 logging.setDefaultClock(globalClock)
 logging.console = True
 
