@@ -7,8 +7,9 @@ classdef EEGStream < handle
         basisFunctions
         numSources
         forwardModel
-        QG, verts, faces
+        QG, verts, faces,scalp_vert,scalp_face,el2scalp
         brainHandles
+        scalpHandles
         channames
         %
         isConnected = false;
@@ -28,6 +29,7 @@ classdef EEGStream < handle
         showTiming = 0;
         showData = 0;
         showBrain = 0;
+        showScalpMap=0;
         showChannels
         
         % Figure handles
@@ -36,7 +38,7 @@ classdef EEGStream < handle
         SourceSurfFigure; SourceSurfAxis; SourceSurface;
         TimeFigure; TimeAxis; TimeSurface;
         ChannelsFigure;
-        BrainFigure; BrainAxis;
+        BrainFigure; BrainAxis;ScalpFigure;ScalpAxis;
         
         % MRA
         collectedData = [];
@@ -75,6 +77,9 @@ classdef EEGStream < handle
             %self.QG = options.QG;
             self.verts = options.verts;
             self.faces = options.faces;
+            self.scalp_vert=options.scalp_vert;
+            self.scalp_face=options.scalp_face;
+            self.el2scalp=options.el2scalp;
             self.numChannels=options.numChannels;
             self.options.channames=options.channames;
             self.collectedData = [];
@@ -137,6 +142,7 @@ classdef EEGStream < handle
             try delete(self.TimeFigure); catch; end;
             try delete(self.ChannelsFigure); catch; end;
             try delete(self.BrainFigure); catch; end;
+            try delete(self.ScalpFigure); catch; end;
             try delete(self.functionTimer); catch; end;
         end
         %
@@ -146,6 +152,8 @@ classdef EEGStream < handle
                 switch figureHandle
                     case self.BrainFigure
                         self.showBrain = 0;
+                    case self.ScalpFigure
+                        self.showScalpMap = 0;
                     case self.DataFigure
                         self.showData = 0;
                     case self.TimeFigure
@@ -163,6 +171,7 @@ classdef EEGStream < handle
         function programCallback(self)
             self.programHandle.togglebutton10.Value = self.showData;
             self.programHandle.togglebutton11.Value = self.showBrain;
+            self.programHandle.togglebutton28.Value = self.showScalpMap;
             self.programHandle.togglebutton14.Value = self.showTiming;
         end
         
@@ -237,6 +246,9 @@ classdef EEGStream < handle
                 %% Various data visualization
                 if self.showData
                     self.plotData(processedData); end
+                
+                if self.showScalpMap
+                    self.plotScalpMap(processedData); end
                 
                 if self.showTiming
                     self.plotTiming(timeStamps); end
@@ -434,7 +446,8 @@ classdef EEGStream < handle
         
         % Other
         dataFileFormat
-        dataHeader = 'Fp1,Fp2,F3,F4,C3,C4,P3,P4,O1,O2,F7,F8,T7,T8,P7,P8,Fz,Cz,Pz,M1,M2,AFz,Cpz,POz,TimeStamp,Event,EventFile,EventTime';
+        dataHeader ='P7,P4,Cz,Pz,P3,P8,O1,O2,T8,F8,C4,F4,Fp2,Fz,C3,F3,Fp1,T7,F7,Oz,PO3,AF3,FC5,FC1,CP5,CP1,CP2,CP6,AF4,FC2,FC6,PO4,TimeStamp,Event,EventFile,EventTime';
+        %dataHeader = 'Fp1,Fp2,F3,F4,C3,C4,P3,P4,O1,O2,F7,F8,T7,T8,P7,P8,Fz,Cz,Pz,M1,M2,AFz,Cpz,POz,TimeStamp,Event,EventFile,EventTime';
         logFileFormat
         logHeader = 'blockSize,timeStamp(end),bufferBlockSize,bufferTimeStamp(end),updateDuration';
     end
@@ -480,7 +493,7 @@ classdef EEGStream < handle
             if isempty(self.replayDataFile)
                 disp('Read file');
                 tableData = readtable([self.replayFileName]);
-                self.replayDataFile = tableData{:, 1:25}';
+                self.replayDataFile = tableData{:, 1:33}';
                 self.DataFileLength=size(self.replayDataFile,2);
             end
             rawData = self.replayDataFile(1:end-1,1:self.options.blockSize);
@@ -627,6 +640,31 @@ classdef EEGStream < handle
             % title(self.Axis,titleString);
         end
         
+        function plotScalpMap(self, data)
+            if isempty(self.ScalpFigure) || ~isvalid(self.ScalpFigure)
+                self.setupScalpFigure();
+                scalpOpts.hfig = self.ScalpFigure;
+                scalpOpts.axes = self.ScalpAxis;
+                scalpOpts.flag_colorbar=true;
+                self.scalpHandles = setup3DBrain(self.scalp_vert, self.scalp_face, zeros(size(self.scalp_vert,1),1), scalpOpts);
+                fig_colorbar=figure(21);
+                ax=gca;%(fig_colorbar);
+                colormap('jet')
+                c=colorbar(ax);
+                caxis([-1 1])
+                ax.Visible='off';
+                set(fig_colorbar,'MenuBar','none');
+            end;
+            Vq = weighted_kernel_regressor(self.el2scalp,data,self.scalp_vert,0.05);
+            %fullSources = self.basisFunctions' * sources;
+            %fullSources = std(fullSources,[],2);
+            %             fullSources = var(fullSources,0,2);
+           %scalp_opts.crange=[-10 10];
+            scalp_opts.thresh=1e-10;
+            self.scalpHandles = plot3DBrain(self.scalpHandles, Vq,scalp_opts);
+            %colorbar;
+            %             plot_3Dbrain(self.verts, self.faces, fullSources, opts);
+        end
         
         function plotBrain(self, sources)
             if isempty(self.BrainFigure) || ~isvalid(self.BrainFigure)
@@ -635,11 +673,11 @@ classdef EEGStream < handle
                 brainOpts.axes = self.BrainAxis;
                 brainOpts.flag_colorbar=true;
                 self.brainHandles = setup3DBrain(self.verts, self.faces, zeros(size(self.verts,1),1), brainOpts);
-                fig_colorbar=figure(2)
+                fig_colorbar=figure(20);
                 ax=gca;%(fig_colorbar);
-                colormap('jet')
+                colormap('jet');
                 c=colorbar(ax);
-                caxis([-0.5 0.5])
+                caxis([-1 1]);
                 ax.Visible='off';
                 set(fig_colorbar,'MenuBar','none')
             end;
@@ -647,8 +685,9 @@ classdef EEGStream < handle
             fullSources = self.basisFunctions' * sources;
             %fullSources = std(fullSources,[],2);
             %             fullSources = var(fullSources,0,2);
-            self.brainHandles.crange=[-0.5 0.5];
-            self.brainHandles = plot3DBrain(self.brainHandles, fullSources);
+            brain_opts.crange=[-0.05 0.05];
+            brain_opts.thresh=1e-5;
+            self.brainHandles = plot3DBrain(self.brainHandles, fullSources,brain_opts);
             %             plot_3Dbrain(self.verts, self.faces, fullSources, opts);
         end
         
@@ -709,6 +748,11 @@ classdef EEGStream < handle
             self.BrainAxis = axes('Parent',self.BrainFigure,'Position',[.13 .15 .78 .75]);
         end
         
+        function setupScalpFigure(self)
+            self.ScalpFigure = figure('Name','Scalp map','Position', [100,100,560,420], 'CloseRequestFcn',{@self.closeFigure});
+            self.ScalpAxis = axes('Parent',self.ScalpFigure,'Position',[.13 .15 .78 .75]);
+        end
+        
         function setupDataFigure(self)
             self.DataFigure = figure('MenuBar','none','Name','Channels','Position', [100,100,560,420], 'CloseRequestFcn',{@self.closeFigure});
             self.DataAxis = axes('Parent',self.DataFigure,'Position',[.13 .15 .78 .75]);   % Change
@@ -718,7 +762,7 @@ classdef EEGStream < handle
             set(self.DataAxis, 'YLim', [-1*self.rangeChannelPlot, (self.numChannels)*self.rangeChannelPlot]);
             set(self.DataAxis, 'YTick', linspace(0, (self.numChannels-1)*self.rangeChannelPlot, self.numChannels))
             %set(self.DataAxis, 'YTickLabel', 1:self.numChannels)
-            set(self.DataAxis, 'YTickLabel', self.options.channames(setdiff(1:24, self.options.bad_chans)));
+            set(self.DataAxis, 'YTickLabel', self.options.channames(setdiff(1:32, self.options.bad_chans)));
             grid on;
             
         end
@@ -770,7 +814,7 @@ classdef EEGStream < handle
             self.options.fileName = ['EEGData/raw_' datestr(datetime, 'dd-mm-yyyy HH-MM-SS') '.csv'];
             self.options.logName = ['EEGData/log' datestr(datetime, 'dd-mm-yyyy HH-MM-SS') '.csv'];
             self.dataFileFormat = '';
-            for i=1:24
+            for i=1:32
                 self.dataFileFormat = [self.dataFileFormat '%1.4f,'];
             end
             %             self.dataFileFormat = [self.dataFileFormat '%1.6f\n'];

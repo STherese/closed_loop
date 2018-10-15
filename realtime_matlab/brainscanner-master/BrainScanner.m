@@ -65,7 +65,7 @@ end
 
 opts.eegStreamName = 'NIC';%'openvibeSignal'; %'EEG';
 opts.bufferrange = 10; % (in seconds)
-opts.channelrange = 1:24;
+opts.channelrange = 1:32;
 
 opts.samplingRate = 500;
 opts.blockSize = 32;
@@ -113,6 +113,10 @@ opts.channames={channels.Channel(:).Name};clear channels
 vertface = load('model/Gain_Enobio_coords','vert','face');
 opts.faces = vertface.face;
 opts.verts = vertface.vert;
+load('model/enobio_scalp_map_files.mat')
+opts.scalp_face=scalp_face;
+opts.scalp_vert=scalp_vert;
+opts.el2scalp=el2scalp;
 opts.numChannels = 32-numel(opts.bad_chans);
 
 % prediction
@@ -334,7 +338,6 @@ function figure1_CloseRequestFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 handles.eeg.stop();
 delete(hObject);
 
@@ -424,7 +427,7 @@ fprintf('Choose calibration data file:\n');
 [filename_data, PathName] = uigetfile('*.csv');
 fprintf('Loading data file %s\n',filename_data)
 calib_data = csvread([PathName,filename_data], 1, 0);%% columns 0
-calib_data = calib_data(:, 1:24);
+calib_data = calib_data(:, 1:32);
 handles.eeg.asr_state = asr_calibrate(preprocess(calib_data', handles.eeg.options), handles.eeg.options.samplingRate);    
 handles.text_viewer_asr_loaded.String = 'Loaded';
 
@@ -494,7 +497,21 @@ fprintf('Choose calibration data file:\n');
 [filename_data, PathName] = uigetfile('*.csv');
 fprintf('Loading data file %s\n',filename_data)
 calib_data = csvread([PathName,filename_data], 1, 0);%% columns 0
-calib_data = calib_data(:, 1:24);
+calib_data = calib_data(:, 1:32);
 handles.eeg.options.experiment.asr_state = asr_calibrate(preprocess(calib_data', handles.eeg.options), handles.eeg.options.samplingRate);    
 
 handles.text35.String = 'Loaded';
+
+
+% --- Executes on button press in togglebutton28.
+function togglebutton28_Callback(hObject, eventdata, handles)
+% hObject    handle to togglebutton28 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of togglebutton28%
+
+if ~hObject.Value
+    handles.eeg.closeFigure(handles.eeg.ScalpFigure); end;
+
+handles.eeg.showScalpMap = hObject.Value;
