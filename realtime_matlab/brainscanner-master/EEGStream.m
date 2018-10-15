@@ -647,13 +647,13 @@ classdef EEGStream < handle
                 scalpOpts.axes = self.ScalpAxis;
                 scalpOpts.flag_colorbar=true;
                 self.scalpHandles = setup3DBrain(self.scalp_vert, self.scalp_face, zeros(size(self.scalp_vert,1),1), scalpOpts);
-                fig_colorbar=figure(21)
+                fig_colorbar=figure(21);
                 ax=gca;%(fig_colorbar);
                 colormap('jet')
                 c=colorbar(ax);
-                caxis([-0.5 0.5])
+                caxis([-1 1])
                 ax.Visible='off';
-                set(fig_colorbar,'MenuBar','none')
+                set(fig_colorbar,'MenuBar','none');
             end;
             Vq = weighted_kernel_regressor(self.el2scalp,data,self.scalp_vert,0.05);
             %fullSources = self.basisFunctions' * sources;
@@ -673,11 +673,11 @@ classdef EEGStream < handle
                 brainOpts.axes = self.BrainAxis;
                 brainOpts.flag_colorbar=true;
                 self.brainHandles = setup3DBrain(self.verts, self.faces, zeros(size(self.verts,1),1), brainOpts);
-                fig_colorbar=figure(20)
+                fig_colorbar=figure(20);
                 ax=gca;%(fig_colorbar);
-                colormap('jet')
+                colormap('jet');
                 c=colorbar(ax);
-                caxis([-1 1])
+                caxis([-1 1]);
                 ax.Visible='off';
                 set(fig_colorbar,'MenuBar','none')
             end;
