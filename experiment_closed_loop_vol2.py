@@ -15,7 +15,7 @@ import os # Can use os.getcwd() to check current working directory
 import random
 from random import sample
 import sys  
-from pylsl import StreamInfo, StreamOutlet
+from pylsl import StreamInfo, StreamOutlet, StreamInlet, resolve_stream
 import numpy as np
 from psychopy import gui, visual, core, data, event, monitors, logging
 from psychopy.constants import (NOT_STARTED, STARTED, FINISHED)
@@ -30,6 +30,7 @@ data_path = path_init()
 # Global variables
 global stableSaveCount 
 stableSaveCount = 1 
+global streams 
 
 trialIDs = list(range(0,11)) # The numbering of the images in stable_save.
 # Denotes the numbering of images in folders, will always be a list of length 50
@@ -250,7 +251,7 @@ log_path = data_path + '\log\\' + 'log_' + str(log_base) + '.csv'
 log_path_key = data_path + '\log\\' + 'log_key_' + str(log_base) + '.csv'
 
 globalClock = core.Clock()
-globalClock.reset() 
+# globalClock.reset() 
 logging.LogFile(log_path, level=logging.EXP, filemode='w')
 logging.setDefaultClock(globalClock)
 logging.console = True
@@ -307,8 +308,6 @@ def runBlock(images,textInput):
             imgCounter += 1
             
 
-
-
 def initializeStableBlock(folderName):
     ''' Initializes the variable "images" later used for psychopy function in a folder
     
@@ -326,6 +325,9 @@ def initializeStableBlock(folderName):
     images = [visual.ImageStim(win, autoLog = True, image = data_path + '\stable\\' + folderName + '\\no_%d.jpg' % trialIDs[idx_image]) for idx_image in range(len(trialIDs))] 
     runBlock(images,textInput) #Calling runBlock with the image input
     print('In the initialize stable blocks loop')
+    
+def closeWin():
+    win.close()
 
 
 # Initializing button press
@@ -334,43 +336,135 @@ keys = event.getKeys(keyList=None, timeStamped=globalClock)
 if event.getKeys(keyList=["escape"]):
     win.close()
 
+#################### EEG FUNCTIONS ###################
+    
+def findStream():    
+    '''Searches for an EEG stream and  '''
+    global streams
+
+    streams = resolve_stream('type', 'EEG') # Searches for EEG stream
+    # Make streams global??
+    
+    if len(streams) != 0:
+        return True
+    
+    return False
+    
+    
+def pullEEG():
+    inlet = StreamInlet(streams[0])
+    eeg_data, timestamp = inlet.pull_chunk(timeout=2.0, max_samples=32)
+#    eeg = np.array(eeg_data)
+    
+    return data
+    
+
+def chunkSizeCorrect():
+    ''' '''
+
+def epochEEG(data, samples_epoch, samples_overlap=0):
+    """Extract epochs from an EEG time series.
+
+    Given a 2D array of the shape [n_samples, n_channels]
+    Creates a 3D array of the shape [wlength_samples, n_channels, n_epochs]
+
+    Args:
+        data (numpy.ndarray or list of lists): data [n_samples, n_channels]
+        samples_epoch (int): window length in samples
+        samples_overlap (int): Overlap between windows in samples
+
+    Returns:
+        (numpy.ndarray): epoched data of shape
+    """
+
+    if isinstance(data, list):
+        data = np.array(data)
+
+    n_samples, n_channels = data.shape
+
+    samples_shift = samples_epoch - samples_overlap
+
+    n_epochs =  int(np.floor((n_samples - samples_epoch) / float(samples_shift)) + 1)
+
+    # Markers indicate where the epoch starts, and the epoch contains samples_epoch rows
+    markers = np.asarray(range(0, n_epochs + 1)) * samples_shift
+    markers = markers.astype(int)
+
+    # Divide data in epochs
+    epochs = np.zeros((samples_epoch, n_channels, n_epochs))
+
+    for i in range(0, n_epochs):
+        epochs[:, :, i] = data[markers[i]:markers[i] + samples_epoch, :]
+
+    return epochs
+
+def computeClassificationVector(eegdata, fs):
+    '''Args:
+        eegdata (numpy.ndarray): array of dimension [number of samples,
+                number of channels]
+        fs (float): sampling frequency of eegdata
+
+    Returns:
+        (numpy.ndarray): feature matrix of shape [number of feature points,
+            number of different features]
+    '''
+
+def computeClassification(epochs, fs):
+    """
+    Call computeClassificationVector for each EEG epoch - NOT DETERMINED YET 
+    """
+    n_epochs = epochs.shape[2]
+
+    for i_epoch in range(n_epochs):
+        if i_epoch == 0:
+            feat = computeClassificationVector(epochs[:, :, i_epoch], fs).T
+            feature_matrix = np.zeros((n_epochs, feat.shape[0])) # Initialize feature_matrix
+
+        feature_matrix[i_epoch, :] = computeClassificationVector(
+                epochs[:, :, i_epoch], fs).T
+
+    return feature_matrix
+
+def trainClassifier(feature_matrix_0, feature_matrix_1):
+    """Train a binary classifier based on the stable blocks.
+
+    First perform Z-score normalization, then fit?
+
+    Args:
+        feature_matrix_0 (numpy.ndarray): array of shape (n_samples,
+            n_features) with examples for Class 0
+        feature_matrix_1 (numpy.ndarray): array of shape (n_samples,
+            n_features) with examples for Class 1
+        
+    Returns:
+        (sklearn object): trained classifier (scikit object)
+        (numpy.ndarray): normalization mean
+        (numpy.ndarray): normalization standard deviation
+    """
+    # Create vector Y (class labels)
+    class0 = np.zeros((feature_matrix_0.shape[0], 1))
+    class1 = np.ones((feature_matrix_1.shape[0], 1))
+
+    # Concatenate feature matrices and their respective labels
+    y = np.concatenate((class0, class1), axis=0)
+    features_all = np.concatenate((feature_matrix_0, feature_matrix_1),
+                                  axis=0)
+
+    # Normalize features columnwise
+    mu_ft = np.mean(features_all, axis=0)
+    std_ft = np.std(features_all, axis=0)
+
+    X = (features_all - mu_ft) / std_ft
+
+    # Train SVM using default parameters
+    clf = svm.SVC()
+    clf.fit(X, y)
+    score = clf.score(X, y.ravel())
+
+    return clf, mu_ft, std_ft, score
+
+
+
 ######################### GUI ##########################
 
 # Store info about the experiment session
-#expName = 'image_experiment'  # from the Builder filename that created this script
-############
-#dlg = gui.Dlg(title=expName)
-#dlg.addText('Subject info')
-#dlg.addField('Name:', "")
-#dlg.addField('Age:', 21)
-#dlg.addField('Note:', "")
-#dlg.addField('Gender:', choices=["Male", "Female"])
-#dlg.addText('Experiment Info')
-#dlg.addField('Folder name:', "experiment_data/expXXX")
-#dlg.addField('Setup:', choices=["Test", "Execution"])
-#dlg.addText('Before clicking OK remember to activate LSL', color='red')
-#ok_data = dlg.show()  # show dialog and wait for OK or Cancel
-#ok_data = np.asarray([str(ii) for ii in ok_data])
-#if not dlg.OK:  # or if ok_data is not None
-#    core.quit()  # user pressed cancel
-#else:
-#
-#    if ok_data[5] == 'Execution':
-#        exp_time = time.localtime()
-#
-#        trialList = initialize(data_path)
-#        experiment_path = data_path + ok_data[4]
-#        file = open(data_path + '/info.txt', "w")
-#
-#        file.write('Name ' + ok_data[0] + '\n')
-#        file.write('Age ' + ok_data[1] + '\n')
-#        file.write('Note ' + ok_data[2] + '\n')
-#        file.write('Gender ' + ok_data[3] + '\n')
-#        file.write('Date ' + str(exp_time.tm_mday) + '/' + str(exp_time.tm_mon) + '/' + str(exp_time.tm_year) + ' ' + str(exp_time.tm_hour) + ':' + str(exp_time.tm_min))
-#
-#        file.close()
-#
-#        print('Input saved')
-#
-#    if ok_data[5] == 'Test':
-#        trialList = initialize(data_path)

@@ -48,7 +48,7 @@ catComb = [['man','woman','indoor','outdoor'],
         # Currently is actually randomly samples from the folders, so that is pretty great. 
         # Can just use the order in stable_save (then it corresponds to the log file, too)
 
-
+####### THIS SHOULD BE IN A SEPARATE PREP SCRIPT #######
 
 # Create the fused images to display (for stable images)
 for k in list(range(0,numStableBlocks)):
@@ -66,6 +66,10 @@ nameStableCats = findCategories(data_path + '\stable\\') #use this as input to I
 for i in list(range(0,numStableBlocks)):   
     folderName = nameStableCats[i]
     initializeStableBlock(folderName)
+    
+    if i == numStableBlocks-1:
+        closeWin()
+    
     
     
 
