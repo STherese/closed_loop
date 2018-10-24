@@ -215,3 +215,13 @@
 26.0208 	DATA 	Keypress: e
 26.2704 	DATA 	Keypress: j
 30.8657 	EXP 	window1: mouseVisible = True
+5272.3020 	EXP 	Created window1 = Window(allowGUI=False, allowStencil=False, args=UNKNOWN, autoLog=True, bitsMode=UNKNOWN, blendMode='avg', color=array([0., 0., 0.]), colorSpace='rgb', fullscr=UNKNOWN, gamma=None, kwargs=UNKNOWN, lms=UNKNOWN, monitor=<psychopy.monitors.calibTools.Monitor object at 0x000001E4CAA4D780>, multiSample=False, name='window1', numSamples=2, pos=[710.0, 290.0], screen=0, size=array([500, 500]), stereo=False, units='deg', useFBO=True, useRetina=False, viewOri=0.0, viewPos=None, viewScale=None, waitBlanking=True, winType='pyglet')
+5272.3072 	EXP 	Created textFix = TextStim(__class__=<class 'psychopy.visual.text.TextStim'>, alignHoriz='center', alignVert='center', antialias=True, autoLog=True, bold=False, color='white', colorSpace='named', contrast=1.0, depth=-1.0, flipHoriz=False, flipVert=False, font='Arial', fontFiles=[], height=1.0, italic=False, name='textFix', opacity=1.0, ori=0, pos=array([0., 0.]), rgb=array([255., 255., 255.]), text='+', units='deg', win=Window(...), wrapWidth=15.0)
+5272.3108 	EXP 	Created textFaces = TextStim(__class__=<class 'psychopy.visual.text.TextStim'>, alignHoriz='center', alignVert='center', antialias=True, autoLog=True, bold=False, color='white', colorSpace='named', contrast=1.0, depth=0.0, flipHoriz=False, flipVert=False, font='Arial', fontFiles=[], height=0.1, italic=False, name='textFaces', opacity=1.0, ori=0, pos=array([0., 0.]), rgb=array([255., 255., 255.]), text='faces', units='norm', win=Window(...), wrapWidth=1)
+5272.3144 	EXP 	Created textScenes = TextStim(__class__=<class 'psychopy.visual.text.TextStim'>, alignHoriz='center', alignVert='center', antialias=True, autoLog=True, bold=False, color='white', colorSpace='named', contrast=1.0, depth=0.0, flipHoriz=False, flipVert=False, font='Arial', fontFiles=[], height=0.1, italic=False, name='textScenes', opacity=1.0, ori=0, pos=array([0., 0.]), rgb=array([255., 255., 255.]), text='scenes', units='norm', win=Window(...), wrapWidth=1)
+5352.2326 	EXP 	window1: mouseVisible = True
+5352.2608 	EXP 	window1: mouseVisible = True
+5352.2820 	EXP 	window1: mouseVisible = True
+5352.3110 	EXP 	window1: mouseVisible = True
+5352.3284 	EXP 	window1: mouseVisible = True
+5352.3459 	EXP 	window1: mouseVisible = True
