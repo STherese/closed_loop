@@ -299,13 +299,13 @@ def runBlock(images,textInput):
     imgCounter = 0 # Count of which image in "images" to take, used for indexing "images"
 
     for frameN in range(0,11): 
-        if imgCounter <= 10: 
-            for frameNew in range(0,stimTime):
-                if frameNew >= 0:
-                    images[imgCounter].draw()
-                win.flip()
-                
-            imgCounter += 1
+        #if imgCounter <= 10: 
+        for frameNew in range(0,stimTime):
+            if frameNew >= 0:
+                images[imgCounter].draw()
+            win.flip()
+            
+        imgCounter += 1
             
 
 def initializeStableBlock(folderName):
