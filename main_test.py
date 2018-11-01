@@ -6,7 +6,7 @@ Created on Mon Oct  1 08:12:52 2018
 """
 
 # Imports
-from experiment_closed_loop_vol2 import * # or only some functions
+from experiment_closed_loop_vol2_lenovo import * # or only some functions
 
 global stableSaveCount
 
