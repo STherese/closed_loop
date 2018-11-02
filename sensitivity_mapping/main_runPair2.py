@@ -12,7 +12,7 @@ import pickle
 import pandas as pd
 import datetime
 import os
-from functionsPair import * 
+from functionsPair2 import * 
 
 no_runs = 5
 
@@ -55,9 +55,9 @@ effect_smap = np.divide(mean_15,std_smaps)
 ###### SAVE AND LOG ######
 os.chdir('/home/grtu/decoding/SVM_pairs/')
 
-np.save('mean_smap' + str(no_runs) + '.npy',mean_smaps)
-np.save('std_smap' + str(no_runs) + '.npy',std_smaps)
-np.save('effect_smap' + str(no_runs) + '.npy',effect_smap)
+np.save('mean_smap2_' + str(no_runs) + '.npy',mean_smaps)
+np.save('std_smap2_' + str(no_runs) + '.npy',std_smaps)
+np.save('effect_smap2_' + str(no_runs) + '.npy',effect_smap)
 # Log which subjects were used in the splits 
-df.to_excel('smap_split' +  str(no_runs) + '.xlsx')
+df.to_excel('smap_split2_' +  str(no_runs) + '.xlsx')
 

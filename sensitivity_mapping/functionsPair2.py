@@ -68,36 +68,6 @@ def makeSplit(X, y):
             
     return subs1, labels1, subs2, labels2, lst1, lst2
 
-def getDualCoef(SVMpickle):
-    '''
-    Input:
-        SVMpickle is a filename of the SVM clf, e.g. 'SVM.pckl'.
-        
-    Returns:
-        Dual coefficient matrix (alpha), zeroes added to obtain full size matrix
-    '''
-    with open(SVMpickle, 'rb') as pickleFile:
-        SVM1 = pickle.load(pickleFile)
-    
-    dc = SVM1.dual_coef_
-    s_array = SVM1.support_
-    
-    dc = np.squeeze(dc)
-    
-    dc_fullsize=np.zeros(4830)
-    cnt = 0
-    for i in range(4830):
-        if i in s_array:
-            dc_fullsize[i] = dc[cnt]
-            cnt += 1
-        else:
-            continue
-    
-    dc_fullsize = np.squeeze(dc_fullsize)
-    
-    return dc_fullsize
-
-
 def runPairSVM(X, y, C_val=1.5, gamma_val=0.00005):
     ''' 
     Needed:
@@ -138,10 +108,7 @@ def runPairSVM(X, y, C_val=1.5, gamma_val=0.00005):
     classifier2 = SVC(random_state=random_state, C=C_val, gamma=gamma_val)
     clf2 = classifier2.fit(X2, y2)
     
-    pickle.dump(clf1, open('SVM1_' + str(date_str) + '.pckl', 'wb'))
-    pickle.dump(clf2, open('SVM2_' + str(date_str) + '.pckl', 'wb'))
-    
-    print('Saved two SVM classifiers, first one for subjects: ' + str(split1) + 'and second one for subjects: ' + str(split2))
+    print('Ran two SVM classifiers, first one for subjects: ' + str(split1) + 'and second one for subjects: ' + str(split2))
     
     ####### MAKE SENSITIVITY MAP - clf1 ########
     M1 = distance.pdist(X1,'euclidean')
@@ -152,8 +119,21 @@ def runPairSVM(X, y, C_val=1.5, gamma_val=0.00005):
     Xt1 = np.transpose(X1)
     K1 = Mexpsquare_gamma1
     
-    #alpha1 = getDualCoef('SVM12018-11-01-18.30.pckl')
-    alpha1 = getDualCoef('SVM1_' + str(date_str) + '.pckl')
+    dc1 = clf1.dual_coef_
+    s_array1 = clf1.support_
+    
+    dc1 = np.squeeze(dc1)
+    
+    dc_fullsize1=np.zeros(4830)
+    cnt1 = 0
+    for i in range(4830):
+        if i in s_array1:
+            dc_fullsize1[i] = dc1[cnt1]
+            cnt1 += 1
+        else:
+            continue
+    
+    alpha1 = np.squeeze(dc_fullsize1)
     
     map1 = np.matmul(Xt1,np.matmul(np.diag(alpha1),K1))-(np.matmul(Xt1,(np.diag(np.matmul(alpha1,K1)))))
     s1 = np.sum(np.square(map1),axis=1)/np.size(alpha1) #Px1 vector
@@ -169,8 +149,21 @@ def runPairSVM(X, y, C_val=1.5, gamma_val=0.00005):
     Xt2 = np.transpose(X2)
     K2 = Mexpsquare_gamma2
     
-#    alpha2 = getDualCoef('SVM22018-11-01-18.30.pckl')
-    alpha2 = getDualCoef('SVM2_' + str(date_str) + '.pckl')
+    dc2 = clf2.dual_coef_
+    s_array2 = clf2.support_
+    
+    dc2 = np.squeeze(dc2)
+    
+    dc_fullsize2=np.zeros(4830)
+    cnt2 = 0
+    for i in range(4830):
+        if i in s_array2:
+            dc_fullsize2[i] = dc2[cnt2]
+            cnt2 += 1
+        else:
+            continue
+    
+    alpha2 = np.squeeze(dc_fullsize2)
     
     map2 = np.matmul(Xt2,np.matmul(np.diag(alpha2),K2))-(np.matmul(Xt2,(np.diag(np.matmul(alpha2,K2)))))
     s2 = np.sum(np.square(map2),axis=1)/np.size(alpha2) #Px1 vector
