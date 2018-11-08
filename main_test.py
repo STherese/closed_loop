@@ -6,7 +6,7 @@ Created on Mon Oct  1 08:12:52 2018
 """
 
 # Imports
-from experiment_closed_loop_vol2_lenovo import * # or only some functions
+from experiment_closed_loop_vol21 import * # or only some functions
 
 global stableSaveCount
 
@@ -26,14 +26,14 @@ if expMode == 'nf':
     numStableBlocks = 4
 
 # Initializing possible combinations for beh sess
-catComb = [['man','woman','indoor','outdoor'],
-           ['man','woman','outdoor','indoor'],
-           ['woman','man','indoor','outdoor'],
-           ['woman','man','outdoor','indoor'],
-           ['indoor','outdoor','man','woman'],
-           ['indoor','outdoor','woman','man'],
-           ['outdoor','indoor','man','woman'],
-           ['outdoor','indoor','woman','man']]
+catComb = [['male','female','indoor','outdoor'],
+           ['male','female','outdoor','indoor'],
+           ['female','male','indoor','outdoor'],
+           ['female','male','outdoor','indoor'],
+           ['indoor','outdoor','male','female'],
+           ['indoor','outdoor','female','male'],
+           ['outdoor','indoor','male','female'],
+           ['outdoor','indoor','female','male']]
 
 #global stableSaveCount 
 #stableSaveCount = 1 
@@ -41,7 +41,7 @@ catComb = [['man','woman','indoor','outdoor'],
 # Try to create different stable_save folders
 # if beh session: initiate fuseStableImages2 8 times. 
 # if NF session: initiate fuseStableImages2 4 times
-# Delete the folders after a session - either manually or script 
+# Delete the folders after a session - either maleually or script 
 # Remember :
 # 1. Log which images are used in which order 
 # 2. To randomly pick from the ones in e.g. face folder, so that different images are used each time
@@ -56,7 +56,7 @@ for k in list(range(0,numStableBlocks)):
     aLure = catComb[k][1]
     nDom = catComb[k][2]
     nLure = catComb[k][3] 
-    fuseStableImages2(aDom, aLure, nDom, nLure)  
+    fuseStableImages(aDom, aLure, nDom, nLure)  
     
     
     
