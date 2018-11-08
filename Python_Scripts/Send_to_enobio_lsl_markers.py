@@ -27,6 +27,7 @@ def save_data(glo,eeg,timestamps):
 from pylsl import StreamInfo, StreamOutlet
 import time
 import random
+import numpy as np
 
 print ("Creating a new marker stream info...\n")
 info = StreamInfo('MyMarkerStream3','Markers',1,0,'int32','myuniquesourceid23443')
@@ -37,19 +38,25 @@ outlet =StreamOutlet(info)
 print("Sending data...\n")
 mkr=0
 c=0
+TIME=np.zeros(1000)
+vec = []
 while (True):
-	vec = []
-	time.sleep(0.5) #random.randint(0,3)
-	mkr = mkr+1
-	vec.append(mkr)
-   TIME[c]=time.time()
-	outlet.push_sample(vec) 
-	print("Now sending: \t" + str(vec)+"\n")
-    c=c+1
+    time.sleep(0.5) #random.randint(0,3)
+    mkr = mkr+1
+    vec.append(mkr)
     
+    TIME[c]=time.time()
+    outlet.push_sample(vec) 
+    print("Now sending: \t" + str(vec)+"\n")
+    c=c+1
 
-
-
+#%%
+from tempfile import TemporaryFile
+send_marker_file = TemporaryFile()
+x = np.arange(10)
+np.save(send_marker_file, TIME)
+send_marker_file.seek(0)
+np.load(send_marker_file)
 
 
 
