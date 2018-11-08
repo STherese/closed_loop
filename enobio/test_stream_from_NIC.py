@@ -114,6 +114,7 @@ while True:
     
 #%%
 import matplotlib.pyplot as plt
+import numpy as np
 Timestamps=[]
 Markers=[]
 with open(glo.filename,'r') as csvfile:
@@ -125,7 +126,22 @@ with open(glo.filename,'r') as csvfile:
         #print(row)
         #rowNr=rowNr+1
 lsl_markers=Markers[2::2]
-enobio_markers=Markers[1::2]
+enobio_markers=Markers[3::2]
+lsl_time=Timestamps[2::2]
+lsl_time=np.asarray([float(s) for s in lsl_time])
+enobio_time=Timestamps[3::2]
+enobio_time=np.asarray([float(s) for s in enobio_time])
 plt.figure(3)
 plt.plot(lsl_markers)
 plt.plot(enobio_markers,'--')
+plt.figure(4)
+plt.plot(lsl_time)
+plt.plot(enobio_time,'--')
+plt.figure(5)
+plt.plot(lsl_time[0:-1]-enobio_time)
+plt.figure(6)
+plt.plot(np.diff(lsl_time))
+plt.plot(np.diff(enobio_time))
+#plt.plot(enobio_time,'--')
+#%%
+lsl_time=[float(s) for s in lsl_time]
