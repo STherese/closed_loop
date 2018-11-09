@@ -6,12 +6,18 @@ Created on Mon Oct  1 08:12:52 2018
 """
 
 # Imports
-from experiment_closed_loop_vol21 import * # or only some functions
+import os
+os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+
+from experiment_closed_loop_vol22 import *
 import numpy as np
 import random
 
-
+############### Global variables ###############
 global stableSaveCount
+global imgIdx
+
+subjID = 1
 
 # Choose between either behavioral experimental session, or NF session
 # OR create two different main scripts? 
@@ -25,16 +31,6 @@ if expMode == 'beh':
 if expMode == 'nf':
     numStableBlocks = 4
 
-# Initializing possible combinations for beh sess
-catComb = [['male','female','indoor','outdoor'],
-           ['male','female','outdoor','indoor'],
-           ['female','male','indoor','outdoor'],
-           ['female','male','outdoor','indoor'],
-           ['indoor','outdoor','male','female'],
-           ['indoor','outdoor','female','male'],
-           ['outdoor','indoor','male','female'],
-           ['outdoor','indoor','female','male']]
-
 catComb1 = [['male','female','indoor','outdoor'],
             ['indoor','outdoor','male','female']]
 
@@ -47,44 +43,74 @@ catComb3 = [['female','male','indoor','outdoor'],
 catComb4 = [['female','male','outdoor','indoor'],
             ['outdoor','indoor','female','male']]
 
-####### THIS SHOULD BE IN A SEPARATE PREP SCRIPT #######
-
+############### PREP ONLY: INDICES FOR FUSING IMGS ###############
 # Create fused images to display for 1 block (8 runs)
-
 # I want to create 4 blocks with catComb1[0] and 4 blocks with catComb1[1]
 
 # Create list with 8 random entries of 4x0 and 4x1
-randLst = [0,0,0,0,1,1,1,1]
+randLst = [0,0,0,0,1,1,1,1] # Currently for just one block 
 randCat  = random.sample(randLst, 8)
 
 # Generates the chosen combination for a subj
-for index in randCat:
-    aDom = catComb1[index][0]
-    aLure = catComb1[index][1]
-    nDom = catComb1[index][2]
-    nLure = catComb1[index][3]
-    fuseStableImages(aDom, aLure, nDom, nLure)
+# Run this loop the no. of times corresponding to the total number of blocks that the subj has to complete (beh + nf)
+
+# Randomly assign 4 subjs to catComb1, 4 subjs to catComb2 etc.
+
+numRuns = 3 # 2 + 2 + 1 + ??? (nf day)
+
+for run in list(range(0,numRuns)):
+    for index in randCat:
+        aDom = catComb1[index][0]
+        aLure = catComb1[index][1]
+        nDom = catComb1[index][2]
+        nLure = catComb1[index][3]
+        createIndices(aDom, aLure, nDom, nLure, subjID)
 
 
-for k in list(range(0,numStableBlocks)):
-    aDom = catComb[k][0]
-    aLure = catComb[k][1]
-    nDom = catComb[k][2]
-    nLure = catComb[k][3] 
-    fuseStableImages(aDom, aLure, nDom, nLure)  
+############### RUN ###############
+# testing whether fuseImage and runImage works
+blockLen = 11# 50
+numBlocks = 4 # 8      
+runLen = numBlocks * blockLen # Should be 8 * 50
     
+for run in list(range(0,numRuns)):
+    for ii in list(range(0,runLen)):
+        if ii % blockLen == 0: # Correct: ii % 50
+            runFixProbe(log_path + '\\createIndices_' + str(subjID) + '.csv')
+        fuseImage(log_path + '\\createIndices_' + str(subjID) + '.csv')    
+        
+        if ii == runLen-1:
+            # win.close()
+            # Inset break?
+            runBreak(300,'break time, yay, you rock!!')
+            print('Finished a run of length: ' + str(runLen))
+            print('Finished run no.: ' + str(run + 1))
+        
+    if run == numRuns-1:  
+        runBreak(900,'Finito!')
+        print('No. total trials finished: ' + str(runLen * numRuns - 1))
+        print('Block length (no. images in each block): ' + str(blockLen))
+        print('Total number of blocks finished: ' + str(numBlocks))
+        print('No. of runs finished: ' + str(numRuns))     
+        closeWin()     
+          
+
     
+
+
+
+############### RUNNING SAVED IMAGES IN BLOCKS (vol2.0) ############### 
     
 # Find the stable_save folders that have been generated
-nameStableCats = findCategories(stable_path) #use this as input to InitializeStableBlock
-    
-for i in list(range(0,numStableBlocks)):   
-    folderName = nameStableCats[i]
-    initializeStableBlock(folderName)
-    
-    if i == numStableBlocks-1:
-        closeWin()
-    
+#nameStableCats = findCategories(stable_path) #use this as input to InitializeStableBlock
+#    
+#for i in list(range(0,numStableBlocks)):   
+#    folderName = nameStableCats[i]
+#    initializeStableBlock(folderName)
+#    
+#    if i == numStableBlocks-1:
+#        closeWin()
+#    
     
     
 
