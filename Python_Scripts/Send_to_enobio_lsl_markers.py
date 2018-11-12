@@ -24,7 +24,7 @@ def save_data(glo,eeg,timestamps):
     return glo
 
 #%%
-from pylsl import StreamInfo, StreamOutlet
+from pylsl import StreamInfo, StreamOutlet,local_clock
 import time
 import random
 import numpy as np
@@ -40,16 +40,18 @@ mkr=0
 c=0
 TIME=np.zeros(1000)
 vec = []
+markers=[]
 while (True):
+    vec = []
     time.sleep(0.5) #random.randint(0,3)
-    mkr = mkr+1
+    markers.append(mkr)
     vec.append(mkr)
-    
-    TIME[c]=time.time()
-    outlet.push_sample(vec) 
+    stamp=local_clock()
+    TIME[c]=stamp
+    outlet.push_sample(vec,stamp) 
     print("Now sending: \t" + str(vec)+"\n")
     c=c+1
-
+    mkr = mkr+1
 #%%
 from tempfile import TemporaryFile
 send_marker_file = TemporaryFile()
@@ -59,4 +61,18 @@ send_marker_file.seek(0)
 np.load(send_marker_file)
 
 
-
+sent_lsl=np.load('C:\\Users\\sofha\\Documents\\closed_loop\\closed_loop\\enobio\\tmpcyu29da5')
+#%%
+import csv
+with open('time_stamps_from_lsl.csv','w') as csvfile:
+        #fieldnames=['name1','name2']
+        writer = csv.writer(csvfile)
+        #writer.writeheader()
+        writer.writerows([TIME])
+        #%%
+        
+a = np.ones(20)
+b = np.zeros(20)
+c = np.ones((20,1))
+d=np.concatenate((a, b)).reshape((-1, 2), order='F')
+e=np.append(d,c,axis=1)
