@@ -10,7 +10,8 @@ vol2.2: Refines vol2.1 and adds breaks, probe
 """
 # Imports
 import os
-os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+# os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
 
 from PIL import Image
 import os 

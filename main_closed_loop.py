@@ -7,7 +7,9 @@ Created on Mon Oct  1 08:12:52 2018
 
 # Imports
 import os
-os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+# os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
+
 
 from experiment_closed_loop_vol22 import *
 import numpy as np
