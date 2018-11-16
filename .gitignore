@@ -5,3 +5,8 @@ realtime_matlab/brainscanner-master/stimuli/log_09-28-18_11-42-40_seed0.txt
 realtime_matlab/brainscanner-master/stimuli/paradigm_09-28-18_11-37-16_seed0.mat
 realtime_matlab/brainscanner-master/stimuli/paradigm_09-28-18_11-41-45_seed0.mat
 realtime_matlab/brainscanner-master/stimuli/paradigm_09-28-18_11-42-40_seed0.mat
+data/female
+data/indoor
+data/male
+data/outdoor
+data/stable
