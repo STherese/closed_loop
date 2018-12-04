@@ -10,8 +10,8 @@ vol2.2: Refines vol2.1 and adds breaks, probe
 """
 # Imports
 import os
-# os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
-os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
+os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+# os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
 
 from PIL import Image
 import os 
@@ -42,6 +42,11 @@ imgIdx = 1
 
 ############### Data frames for logging ###############
 df_stableSave = pd.DataFrame(columns=['attentive cat','img1', 'img2'])
+
+
+############### Outlet ###############
+info = StreamInfo('PsychopyExperiment', 'Markers', 1, 0, 'string', 'myuidw43536')
+outlet = StreamOutlet(info)
 
 
 ############### Experimental initialization ###############
@@ -303,10 +308,12 @@ def runImage(fusedImg):
     
     image = visual.ImageStim(win, autoLog = True, image = fusedImg)
     
-    for frameNew in range(0,stimTime): 
+    for frameNew in range(0,stimTime):
+        outlet.push_sample(['before_img'])
         if frameNew >= 0:
             image.draw()
         win.flip()
+        outlet.push_sample(['after_img'])
         
 def runBreak(breakLen,message):
     """Runs a break the defined experimental window (win).
@@ -326,7 +333,10 @@ def runBreak(breakLen,message):
     
     for frameNew in range(0,breakLen): 
         textBreak.draw()
+        outlet.push_sample(['before_break'])
         win.flip()
+        outlet.push_sample(['after_break'])
+
 
 
 def runFixProbe(csvfile):
@@ -355,15 +365,23 @@ def runFixProbe(csvfile):
     
     for frameN in range(0,fixTime):
         textFix.draw()
+        outlet.push_sample(['before_fix'])
         win.flip()
+        outlet.push_sample(['after_fix'])
+
         
     for frameN in range(0,probeTime):
         textGeneral.draw()
+        outlet.push_sample(['before_text'])
         win.flip()
+        outlet.push_sample(['after_text'])
         
 
 def runBlock(images,textInput):
-    """Initializes a single block with text for 1 s, fixation cross, and trials for 1 s.
+    """
+    FOR VERSION 1.0 OF SCRIPT
+    
+    Initializes a single block with text for 1 s, fixation cross, and trials for 1 s.
     
     # Arguments
         images: from initializeStableBlock, chooses images generated from a chosen foldername.
