@@ -48,16 +48,17 @@ for i in range(0,250):
     time.sleep(0.08)
     update_eeg(eeg_figure,timestamps,ch1)
 #%%
-    
-class data:
-    def __init__(self, fs,filename=None):
-        self.fs,self.filename = fs,filename
-glo=data(500)
+import csv
+class data_init:
+    def __init__(self, fs,data_type,filename=None):
+        self.fs,self.filename,self.data_type = fs,filename,data_type
+        
+glo=data_init(500,'test')
 #glo.options.filename=time.strftime("%H%M%S_%d%m%Y")
 def save_data(data,sample,timestamp):
     #if exist(glo.options.filename)
     if data.filename==None:
-        data.filename='data_'+time.strftime("%H%M%S_%d%m%Y")+'.csv'
+        data.filename='data_'+data.data_type+'_'+time.strftime("%H%M%S_%d%m%Y")+'.csv'
         with open(data.filename,'w',newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(data.header)
@@ -68,8 +69,11 @@ def save_data(data,sample,timestamp):
         if len(sample)<=1:
             writer.writerow(np.append(np.array([sample]),np.array([timestamp])))
         else:
-            writer.writerows(np.append(np.squeeze(np.array([sample])),np.array([timestamp]).T,axis=1))
+            writer.writerows(np.append(sample,np.array([timestamp]).T,axis=1))
     return data
+
+def clear_stream(inlet):
+    sample0, timestamp0 = inlet.pull_chunk(max_samples=1500)
 #glo=save_data(glo,51,'310')
 #glo=save_data(glo,51,'313333')
 #%%
@@ -86,8 +90,7 @@ from pylsl import StreamInlet, resolve_stream
 import csv
 import time
 import numpy as np
-glo=data(500)
-glo.header=['Marker','Timestamp']
+
 time.sleep(1)
 stream_name_Enobio = 'Enobio1-Markers'
 streams = resolve_stream('type', 'Markers')
@@ -96,47 +99,110 @@ enobio_avail=0
 lsl_avail=0
 look_for_enobio=1
 look_for_enobio_EEG=1
+max_buf=2
+fs=500
+import warnings
 
 if look_for_enobio_EEG:
     streamsEEG = resolve_stream('type', 'EEG')
-    inlet_EEG=StreamInlet(streamsEEG[0])
-    gloEEG=data(500)
-    gloEEG.header=['P7','P4','Cz','Pz','P3','P8','O1','O2','T8','F8','C4','F4','Fp2','Fz','C3','F3','Fp1','T7','F7','Oz','PO3','AF3','FC5','FC1','CP5','CP1','CP2','CP6','AF4','FC2','FC6','PO4','Timestamp']
+    inlet_EEG=StreamInlet(streamsEEG[0],max_buflen=max_buf)
+    store_EEG=data_init(500,'EEG')
+    store_EEG.header=['P7','P4','Cz','Pz','P3','P8','O1','O2','T8','F8','C4','F4','Fp2','Fz','C3','F3','Fp1','T7','F7','Oz','PO3','AF3','FC5','FC1','CP5','CP1','CP2','CP6','AF4','FC2','FC6','PO4','Timestamp']
 for i in range (len(streams)):
     if look_for_enobio:
         if (streams[i].name() == stream_name_Enobio):
             index_enobio = i
             print ("NIC stream available")
             inlet_enobio = StreamInlet(streams[index_enobio]) 
-            enobio_avail=1     
+            enobio_avail=1
+            store_enobio_marker=data_init(500,'enobio_marker')
+            store_enobio_marker.header=['Marker','Timestamp']
     if (streams[i].name() == stream_name_lsl):
         index_lsl = i
         print ("lsl stream available")
         inlet_lsl = StreamInlet(streams[index_lsl])
         lsl_avail=1
+        store_lsl_marker=data_init(500,'lsl_marker')
+        store_lsl_marker.header=['Marker','Timestamp']
 
-#print ("Connecting to NIC stream... \n")
-
-   
-
-#except NameError:
-#	print ("Error: NIC stream not available\n\n\n")
-    
-
-
+excess_EEG=np.zeros(32)
+excess_time_EEG=[]
+pull_interval=1
+cnt=1
+look_for_triggers=1
+run_exp=1
 while True:
-    if enobio_avail:
-        
-        sample, timestamp = inlet_enobio.pull_sample()#_chunk(timeout=0,max_samples=500)
-        glo=save_data(glo,sample,timestamp)
-    if lsl_avail:
-        sample_lsl, timestamp_lsl = inlet_lsl.pull_sample()
-        glo=save_data(glo,sample_lsl,timestamp_lsl)
+    t1=time.clock()
+    if look_for_triggers:
+        if enobio_avail:       
+            if cnt ==1:
+                clear_stream(inlet_enobio)
+            sample, timestamp = inlet_enobio.pull_chunk()#_chunk(timeout=0,max_samples=500)
+            sample=np.asarray(sample)
+            timestamp =np.asarray(timestamp) 
+            store_enobio_marker=save_data(store_enobio_marker,sample,timestamp)
+        if lsl_avail:
+            if cnt ==1:
+                clear_stream(inlet_lsl)
+            sample_lsl, timestamp_lsl = inlet_lsl.pull_chunk()
+            sample_lsl=np.asarray(sample_lsl)
+            timestamp_lsl =np.asarray(timestamp_lsl) 
+            store_lsl_marker=save_data(store_lsl_marker,sample_lsl,timestamp_lsl)
     if look_for_enobio_EEG:
-        sampleEEG, timestampEEG = inlet_EEG.pull_chunk()#_chunk(timeout=0,max_samples=500)
+        if cnt ==1:
+            clear_stream(inlet_EEG)
+        sample_EEG, timestamp_EEG = inlet_EEG.pull_chunk()#_chunk(timeout=0,max_samples=500)   
+        sample_EEG=np.asarray(sample_EEG)
+        timestamp_EEG =np.asarray(timestamp_EEG) 
+        store_EEG=save_data(store_EEG,sample_EEG,timestamp_EEG)
+        if excess_EEG.any():
+            sample_EEG=np.concatenate((excess_EEG, sample_EEG),axis=0)
+            timestamp_EEG=np.concatenate((excess_time_EEG, timestamp_EEG),axis=0)
+    
+    
+    if run_exp and sample_lsl.any(): # find stimuli onset in EEG
+        if len(sample_lsl)>1:    # should be changed to enobio marker    
+            print("Warning. More than two trigger points recovered, using most recent one")
+            sample_lsl=sample_lsl[-1]
+            timestamp_lsl=timestamp_lsl[-1]
+            
+        i_start=np.argmin(np.abs(timestamp_lsl-timestamp_EEG))
+        avail_samples=(len(timestamp_EEG)-i_start)
         
-        gloEEG=save_data(gloEEG,sampleEEG,timestampEEG)
-    time.sleep(0.400)
+        if avail_samples>=fs:
+            epoch=sample_EEG[i_start:i_start+fs-1]
+            
+            #do preprocess and classify
+            #...
+            #...
+            #...
+            print('Classifying')
+            
+            look_for_triggers=1
+            excess_EEG=sample_EEG[i_start+fs:]
+            excess_time_EEG=timestamp_EEG[i_start+fs:]
+            t2=time.clock()
+            if (t2-t1)<pull_interval: 
+                t2=time.clock()   
+                #print((t2-t1))
+                time.sleep(pull_interval-(t2-t1))# Time to next epoch should be ready  
+        else:
+            print("Warning. Not enough EEG samples available")
+            time.sleep(pull_interval-avail_samples/fs)
+            look_for_triggers=0
+            excess_EEG=sample_EEG
+            excess_time_EEG=timestamp_EEG
+
+    elif not sample_lsl.any():
+        print("Warning. No trigger points recovered")
+        time.sleep(0.1)
+        look_for_triggers=1
+        excess_EEG=sample_EEG
+        excess_time_EEG=timestamp_EEG
+    else:
+        time.sleep(1)
+    
+    cnt+=1
     #print("Timestamp: \t %0.5f\n Sample: \t %s\n\n" %(timestamp,   sample))
     
 #%%
@@ -158,7 +224,10 @@ with open(gloEEG.filename,'r') as csvfile:
             #channels.append(row[0:31])
         #print(row)
         #rowNr=rowNr+1
-
+#%%
+clear_stream(inlet_EEG)
+sample_EEG1, timestamp_EEG1 = inlet_EEG.pull_chunk()
+sample_EEG2, timestamp_EEG2 = inlet_EEG.pull_chunk()
 #%%
 import matplotlib.pyplot as plt
 import numpy as np
