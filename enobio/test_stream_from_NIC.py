@@ -94,7 +94,7 @@ import numpy as np
 time.sleep(1)
 stream_name_Enobio = 'Enobio1-Markers'
 streams = resolve_stream('type', 'Markers')
-stream_name_lsl = 'MyMarkerStream3'
+stream_name_lsl = 'MyMarkerStream1'
 enobio_avail=0
 lsl_avail=0
 look_for_enobio=1
@@ -131,6 +131,7 @@ pull_interval=1
 cnt=1
 look_for_triggers=1
 run_exp=1
+C=1
 while True:
     t1=time.clock()
     if look_for_triggers:
@@ -170,8 +171,10 @@ while True:
         avail_samples=(len(timestamp_EEG)-i_start)
         
         if avail_samples>=fs:
+            C+=1
             epoch=sample_EEG[i_start:i_start+fs-1]
-            
+            plt.figure(C)
+            plt.plot(epoch)
             #do preprocess and classify
             #...
             #...
