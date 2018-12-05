@@ -45,15 +45,14 @@ df_stableSave = pd.DataFrame(columns=['attentive cat','img1', 'img2'])
 
 
 ############### Outlet ###############
-info = StreamInfo('PsychopyExperiment', 'Markers', 1, 0, 'string', 'myuidw43536')
+info = StreamInfo('PsychopyExperiment2', 'Markers', 1, 0, 'int32', 'myuidw43536')
 outlet = StreamOutlet(info)
 
 
 ############### Experimental initialization ###############
 
 # Initializing window
-win = visual.Window()
-    #size=[500, 500], fullscr=False,winType='pygame')#screen=0,
+win = visual.Window(size=[1000, 1000], fullscr=False,winType='pyglet')#screen=0,
     #allowGUI=False, allowStencil=False,
     #monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb')
 
@@ -186,9 +185,9 @@ def createRandomImages(dom='female',lure='male'):
     
     for key, value in imagesInEachCategory.items():        
         if key == dom:
-            randomDom = sample(value, 10) # Randomly takes X no of samples from the value list corresponding to that category
+            randomDom = sample(value, 45) # Randomly takes X no of samples from the value list corresponding to that category
         if key == lure:
-            randomLure = sample(value, 1)
+            randomLure = sample(value, 5)
             
     fusedList = randomDom + randomLure
     random.shuffle(fusedList)
@@ -308,11 +307,11 @@ def runImage(fusedImg):
     image = visual.ImageStim(win, autoLog = True, image = fusedImg)
     
     for frameNew in range(0,stimTime):
-        outlet.push_sample(['before_img'])
+        outlet.push_sample([1])
         if frameNew >= 0:
             image.draw()
         win.flip()
-        outlet.push_sample(['after_img'])
+        #outlet.push_sample(['after_img'])
         
 def runBreak(breakLen,message):
     """Runs a break the defined experimental window (win).
@@ -332,9 +331,9 @@ def runBreak(breakLen,message):
     
     for frameNew in range(0,breakLen): 
         textBreak.draw()
-        outlet.push_sample(['before_break'])
+        outlet.push_sample([2])
         win.flip()
-        outlet.push_sample(['after_break'])
+        #outlet.push_sample(['after_break'])
 
 
 
@@ -364,16 +363,16 @@ def runFixProbe(csvfile):
     
     for frameN in range(0,fixTime):
         textFix.draw()
-        outlet.push_sample(['before_fix'])
+        outlet.push_sample([3])
         win.flip()
-        outlet.push_sample(['after_fix'])
+        #outlet.push_sample(['after_fix'])
 
         
     for frameN in range(0,probeTime):
         textGeneral.draw()
-        outlet.push_sample(['before_text'])
+        outlet.push_sample([4])
         win.flip()
-        outlet.push_sample(['after_text'])
+        #outlet.push_sample(['after_text'])
         
 
 def runBlock(images,textInput):

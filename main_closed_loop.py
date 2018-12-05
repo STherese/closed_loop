@@ -7,20 +7,23 @@ Created on Mon Oct  1 08:12:52 2018
 
 # Imports
 import os
-os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
-# os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
+# os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
 
 
-from experiment_closed_loop_vol22 import *
+from experiment_closed_loop_vol23 import *
 import numpy as np
 import random
+import time
 
 ############### Global variables ###############
 global stableSaveCount
 global imgIdx
 
-subjID = 1
+subjID = 3
+numRuns = 2 # 2 + 2 + 1 + ??? (nf day)
 
+#%%
 # Choose between either behavioral experimental session, or NF session
 # OR create two different main scripts? 
 expMode = 'beh'
@@ -58,8 +61,6 @@ randCat  = random.sample(randLst, 8)
 
 # Randomly assign 4 subjs to catComb1, 4 subjs to catComb2 etc.
 
-numRuns = 3 # 2 + 2 + 1 + ??? (nf day)
-
 for run in list(range(0,numRuns)):
     for index in randCat:
         aDom = catComb1[index][0]
@@ -68,11 +69,11 @@ for run in list(range(0,numRuns)):
         nLure = catComb1[index][3]
         createIndices(aDom, aLure, nDom, nLure, subjID)
 
-
+#%%
 ############### RUN ###############
 # testing whether fuseImage and runImage works
-blockLen = 11# 50
-numBlocks = 4 # 8      
+blockLen = 50 # 50
+numBlocks = 2 # 8      
 runLen = numBlocks * blockLen # Should be 8 * 50
     
 for run in list(range(0,numRuns)):
