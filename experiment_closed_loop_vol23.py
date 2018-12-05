@@ -10,8 +10,8 @@ vol2.2: Refines vol2.1 and adds breaks, probe
 """
 # Imports
 import os
-# os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
-os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
+os.chdir('C:\\Users\\Greta\\Documents\GitHub\closed_loop')
+# os.chdir('C:\\Users\\nicped\\Documents\GitHub\closed_loop')
 
 from PIL import Image
 import os 
@@ -52,9 +52,10 @@ outlet = StreamOutlet(info)
 ############### Experimental initialization ###############
 
 # Initializing window
-win = visual.Window(size=[1000, 1000], fullscr=False,winType='pyglet')#screen=0,
-    #allowGUI=False, allowStencil=False,
-    #monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb')
+# win = visual.Window(size=[1000, 1000], fullscr=False,winType='pyglet')
+win = visual.Window(size=[1000, 1000], fullscr=False,screen=0,
+    allowGUI=False, allowStencil=False,
+    monitor='testMonitor', color=[0, 0, 0], colorSpace='rgb')
 
 # win.close() #Bug: opens window automatically here? 
 
