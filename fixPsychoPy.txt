@@ -1,0 +1,6 @@
+https://discourse.psychopy.org/t/typeerror-cannot-convert-int-object-to-byte/4340/5
+
+Downgrade PsychoPy to 1.90.1
+Downgrade pyglet to 1.4.2
+
+edit pyglet visual backend
