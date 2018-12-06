@@ -102,7 +102,7 @@ import numpy as np
 time.sleep(1)
 stream_name_Enobio = 'Enobio1-Markers'
 streams = resolve_stream('type', 'Markers')
-stream_name_lsl = 'PsychopyExperiment2'#'MyMarkerStream1'
+stream_name_lsl = 'PsychopyExperiment3'#'MyMarkerStream1'
 enobio_avail=0
 lsl_avail=0
 look_for_enobio=1
