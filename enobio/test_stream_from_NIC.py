@@ -58,7 +58,7 @@ glo=data_init(500,'test')
 def save_data(data,sample,timestamp):
     #if exist(glo.options.filename)
     if data.filename==None:
-        data.filename='data_'+data.data_type+'_'+time.strftime("%H%M%S_%d%m%Y")+'.csv'
+        data.filename='C:\\Users\\nicped\\Documents\\GitHub\\closed_loop\\logging\\EEGdata\\'+'data_'+data.data_type+'_'+time.strftime("%H%M%S_%d%m%Y")+'.csv'
         with open(data.filename,'w',newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(data.header)
@@ -102,7 +102,7 @@ import numpy as np
 time.sleep(1)
 stream_name_Enobio = 'Enobio1-Markers'
 streams = resolve_stream('type', 'Markers')
-stream_name_lsl = 'MyMarkerStream1'
+stream_name_lsl = 'PsychopyExperiment2'#'MyMarkerStream1'
 enobio_avail=0
 lsl_avail=0
 look_for_enobio=1
@@ -138,7 +138,7 @@ excess_time_EEG=[]
 pull_interval=1
 cnt=1
 look_for_triggers=1
-run_exp=1
+run_exp=0
 C=1
 while True:
     t1=time.clock()
@@ -180,9 +180,9 @@ while True:
         
         if avail_samples>=fs:
             C+=1
-            epoch=sample_EEG[i_start:i_start+fs-1]
-            plt.figure(C)
-            plt.plot(epoch)
+            epoch=sample_EEG[i_start:i_start+fs-1] # 32 x 500 
+            #plt.figure(C)
+            #plt.plot(epoch)
             #do preprocess and classify
             #...
             #...
