@@ -77,6 +77,13 @@ def clear_stream(inlet):
 #glo=save_data(glo,51,'310')
 #glo=save_data(glo,51,'313333')
 #%%
+NOTCH_b, NOTCH_a = butter(4, np.array([45, 55])/(256/2), btype='bandstop')
+from scipy.signal import butter, lfilter, lfilter_zi
+def nothch_filter_data(data,NOTCH_A=NOTCH_a,NOTCH_B=NOTCH_a):
+    if filter_state is None:
+                filter_state = np.tile(lfilter_zi(NOTCH_B, NOTCH_A),(data.shape[1], 1)).T
+                new_data, filter_state = lfilter(NOTCH_B, NOTCH_A, new_data, axis=0,zi=filter_state)
+#%%
 #### 		Read from Enobio LSL Markers		####
 
  # The stream_name must be the same as in NIC/COREGUI.
@@ -90,6 +97,7 @@ from pylsl import StreamInlet, resolve_stream
 import csv
 import time
 import numpy as np
+
 
 time.sleep(1)
 stream_name_Enobio = 'Enobio1-Markers'
@@ -188,7 +196,7 @@ while True:
             if (t2-t1)<pull_interval: 
                 t2=time.clock()   
                 #print((t2-t1))
-                time.sleep(pull_interval-(t2-t1))# Time to next epoch should be ready  
+                time.sleep(max(pull_interval-(t2-t1),0))# Time to next epoch should be ready  
         else:
             print("Warning. Not enough EEG samples available")
             time.sleep(pull_interval-avail_samples/fs)
