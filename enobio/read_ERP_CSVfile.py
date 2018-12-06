@@ -36,7 +36,9 @@ import numpy as np
 le=np.zeros(140000)
 EEGdata=[]
 c=0#data_EEG_134249_05122018.csv
-with open('C:\\Users\\nicped\Documents\\GitHub\\closed_loop\\logging\\EEGdata\\data_EEG_142307_06122018.csv','r') as csvfile:
+sofha_dir='C:\\Users\\sofha\\Documents\\closed_loop\\closed_loop\\logging\\EEGdata\\'
+mindreader_dir='C:\\Users\\nicped\Documents\\GitHub\\closed_loop\\logging\\EEGdata\\'
+with open(sofha_dir+'data_EEG_142307_06122018.csv','r') as csvfile:
 #fieldnames=['name1','name2']
     csvReader = csv.reader(csvfile)
     for row in csvfile:
@@ -44,11 +46,31 @@ with open('C:\\Users\\nicped\Documents\\GitHub\\closed_loop\\logging\\EEGdata\\d
         le[c]=(len(rownum))
         EEGdata.append(rownum)
         c+=1
+
+marker=[]
+marker_time=[]
+c=0
+with open(sofha_dir+'data_lsl_marker_142307_06122018.csv','r') as csvfile:
+#fieldnames=['name1','name2']
+    csvReader = csv.reader(csvfile)
+    for row in csvfile:
+        rownum=np.fromstring(row,dtype=float,sep=',')
+        le[c]=(len(rownum))
+        if len(rownum)>1:
+            marker.append(rownum[0])
+            marker_time.append(rownum[1])
+        c+=1
         
-#%%
 EEGdata=EEGdata[2:]
-#%%
 eegdata=np.array(EEGdata)
+#marker=marker[2:]
+#marker_time=marker_time[2:]
+#%% preprocess
+from scipy import signal
+fs=500
+fs_new=100
+num_samples=np.round(len(eegdata)/(fs/fs_new))
+eegdata_resamp=signal.resample(eegdata, num_samples,window='boxcar')
 #%%
 import matplotlib.pyplot as plt
 plt.plot(eegdata[:,-1]-eegdata[0,-1])
