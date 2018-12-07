@@ -6,6 +6,8 @@ Created on Thu Sep 20 13:08:54 2018
 
 vol2.1: Possible to display fused images before saving them first (only based on indices)
 vol2.2: Refines vol2.1 and adds breaks, probe
+vol2.3: outlet
+vol2.4: remove logging
 
 """
 # Imports
@@ -78,22 +80,19 @@ trialIDs = list(range(0,11)) # The numbering of the images in stable_save. Denot
 globalClock = core.Clock() #reset?
 keys = event.getKeys(keyList=None, timeStamped=globalClock)
 
-if event.getKeys(keyList=["escape"]):
-    win.close()
-
 # Prepare PsychoPy log
 log_base = time.strftime('%m-%d-%y_%H-%M-%S')
-logWritePath = log_path + '\\log_' + str(log_base) + '.csv'
+#logWritePath = log_path + '\\log_' + str(log_base) + '.csv'
 logWritePathKey = log_path + '\\log_key_' + str(log_base) + '.csv'
 
 # globalClock.reset() 
-logging.LogFile(logWritePath, level=logging.EXP, filemode='w')
-logging.setDefaultClock(globalClock)
-logging.console = False
+#logging.LogFile(logWritePath, level=logging.EXP, filemode='w')
+#logging.setDefaultClock(globalClock)
+#logging.console = False
 
 logging.LogFile(logWritePathKey, level=logging.DATA, filemode='w') # Log file for button press only
 logging.setDefaultClock(globalClock)
-logging.console = False
+logging.console = True
 
 def log(msg):
     """Prints messages in the promt and adds msg to PsychoPy log file. """ 
@@ -103,6 +102,9 @@ def log(msg):
 def closeWin():
     """Closes the pre-defined experimental window (win). """
     win.close()
+    
+if event.getKeys(keyList=["escape"]):
+    closeWin()
 
 
 ############### Experiment functions ###############
